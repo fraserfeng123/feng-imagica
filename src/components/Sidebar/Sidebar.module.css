@@ -1,0 +1,35 @@
+.sidebar {
+  background: #fff;
+  box-shadow: 1px 0 0 0 #f0f0f0;
+}
+
+.menu {
+  padding-top: 16px;
+}
+
+.menuItem {
+  margin: 4px 0;
+  padding-left: 24px !important;
+  transition: all 0.3s ease;
+}
+
+.menuItem:hover {
+  background-color: #e6f7ff;
+}
+
+:global(.ant-menu-item-selected) {
+  background-color: #e6f7ff !important;
+  border-right: 3px solid #1890ff;
+}
+
+:global(.ant-menu-item-selected::after) {
+  display: none;
+}
+
+:global(.ant-menu-item-active) {
+  background-color: #e6f7ff !important;
+}
+
+:global(.ant-menu-item .anticon) {
+  font-size: 18px;
+}

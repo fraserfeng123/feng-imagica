@@ -1,0 +1,88 @@
+.home {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #000;
+  color: #fff;
+  overflow: hidden;
+  position: relative;
+}
+
+.content {
+  text-align: center;
+  z-index: 1;
+}
+
+.logo {
+  width: 100px;
+  margin-bottom: 2rem;
+  animation: pulse 2s infinite;
+}
+
+.highlight {
+  color: #00ffff;
+  font-weight: bold;
+}
+
+.ctaButton {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: #00ffff;
+  color: #000;
+  text-decoration: none;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-radius: 30px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.ctaButton:hover {
+  background-color: #fff;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+}
+
+.backgroundAnimation {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, #000033, #000066, #000099);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+  opacity: 0.3;
+}
+
+@keyframes gradientBG {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* 添加一些响应式设计 */
+@media (max-width: 768px) {
+  .logo {
+    width: 80px;
+  }
+}
