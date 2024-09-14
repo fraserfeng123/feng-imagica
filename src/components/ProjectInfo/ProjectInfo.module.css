@@ -1,5 +1,5 @@
 .projectInfo {
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
 
 .projectTitle {
@@ -15,4 +15,11 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.projectMeta {
+  margin-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }

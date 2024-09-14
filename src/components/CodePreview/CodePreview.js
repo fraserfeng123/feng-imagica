@@ -9,7 +9,11 @@ const CodePreview = ({ code }) => {
   return (
     <div className={styles.previewContainer}>
       {code.language === 'html' ? (
-        <div dangerouslySetInnerHTML={{ __html: code.code }} />
+        <iframe
+          srcDoc={`<html><body>${code.code}</body></html>`}
+          title="HTML Preview"
+          className={styles.previewIframe}
+        />
       ) : (
         <pre>{code.code}</pre>
       )}

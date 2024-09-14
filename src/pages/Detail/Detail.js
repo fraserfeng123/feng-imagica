@@ -6,7 +6,7 @@ import { MobileOutlined, GlobalOutlined, WechatOutlined } from '@ant-design/icon
 import ProjectInfo from '../../components/ProjectInfo/ProjectInfo';
 import ProjectChat from '../../components/ProjectChat/ProjectChat';
 import CodePreview from '../../components/CodePreview/CodePreview';
-import { updateProjectCode } from '../../redux/projectSlice';
+import { updateProjectCode, updateProjectChatList } from '../../redux/projectSlice';
 import styles from './Detail.module.css';
 
 const { Content, Sider } = Layout;
@@ -52,6 +52,10 @@ const Detail = () => {
     dispatch(updateProjectCode({ id: project.id, code: newCode }));
   };
 
+  const handleUpdateChatList = (newChatList) => {
+    dispatch(updateProjectChatList({ id: project.id, chatList: newChatList }));
+  };
+
   return (
     <Layout className={styles.detailLayout}>
       <Content className={styles.content}>
@@ -95,7 +99,11 @@ const Detail = () => {
             )}
           </Content>
           <Sider width={500} theme='light' className={styles.chatSider}>
-            <ProjectChat onAcceptCode={handleAcceptCode} />
+            <ProjectChat 
+              onAcceptCode={handleAcceptCode} 
+              initialChatList={project.chatList}
+              onUpdateChatList={handleUpdateChatList}
+            />
           </Sider>
         </Layout>
       </Content>

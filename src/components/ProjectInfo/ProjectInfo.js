@@ -1,13 +1,29 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Typography, Tag, Space, Button, Row, Col, Avatar } from 'antd';
-import { ArrowLeftOutlined, TeamOutlined, CalendarOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, DownloadOutlined, CalendarOutlined } from '@ant-design/icons';
 import styles from './ProjectInfo.module.css';
 
 const { Title, Text } = Typography;
 
 const ProjectInfo = ({ project, getProjectTypeIcon }) => {
   const navigate = useNavigate();
+
+  const downloadCode = () => {
+    if (project.code) {
+      const blob = new Blob([project.code.code], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${project.name}.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } else {
+      alert('没有可下载的代码');
+    }
+  };
 
   return (
     <Card className={styles.projectInfo}>
@@ -29,6 +45,13 @@ const ProjectInfo = ({ project, getProjectTypeIcon }) => {
                 <Avatar key={index} style={{ backgroundColor: '#f56a00' }}>U</Avatar>
               ))}
             </Avatar.Group>
+            <Button 
+              type="primary" 
+              icon={<DownloadOutlined />} 
+              onClick={downloadCode}
+            >
+              下载代码
+            </Button>
             <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/projects')}>返回</Button>
           </Space>
         </Col>

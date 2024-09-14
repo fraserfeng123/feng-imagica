@@ -11,8 +11,8 @@ SyntaxHighlighter.registerLanguage('javascript', js);
 const { TextArea } = Input;
 const { Text } = Typography;
 
-const ProjectChat = ({ onAcceptCode }) => {
-  const [messages, setMessages] = useState([
+const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList }) => {
+  const [messages, setMessages] = useState(initialChatList.length > 0 ? initialChatList : [
     { id: 1, sender: 'System', content: '欢迎来到Imagica！赶紧和我聊天实现你的应用吧。', time: '10:00' },
   ]);
   const [newMessage, setNewMessage] = useState('');
@@ -27,6 +27,12 @@ const ProjectChat = ({ onAcceptCode }) => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    onUpdateChatList(messages);
+  }, [messages, onUpdateChatList]);
+
+  console.log(messages);
 
   const handleSend = async () => {
     if (newMessage.trim() && !isLoading) {
@@ -62,10 +68,18 @@ const ProjectChat = ({ onAcceptCode }) => {
         }
 
         const data = await response.json();
+        let content = data.choices[0].message.content;
+        
+        // 替换特定文字
+        content = content.replace(
+          "HTML代码",
+          "预览图"
+        );
+
         const systemMsg = {
           id: messages.length + 2,
           sender: 'System',
-          content: data.choices[0].message.content,
+          content: content,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
         setMessages(prevMessages => [...prevMessages, systemMsg]);
@@ -100,23 +114,22 @@ const ProjectChat = ({ onAcceptCode }) => {
       if (match.index > lastIndex) {
         parts.push(content.slice(lastIndex, match.index));
       }
-      const language = match[1] || 'javascript';
+      const language = match[1] || 'html';
       const code = match[2].trim();
       parts.push(
         <div className={styles.codeBlockWrapper} key={match.index}>
           <div className={styles.codeBlockHeader}>
             <span>{language}</span>
           </div>
-          <SyntaxHighlighter 
-            language={language} 
-            style={atomOneDark}
-            customStyle={{
-              margin: 0,
-              borderRadius: '0 0 4px 4px',
-            }}
-          >
-            {code}
-          </SyntaxHighlighter>
+          {language === 'html' ? (
+            <iframe
+              srcDoc={`<html><body>${code}</body></html>`}
+              title="HTML Preview"
+              className={styles.codePreviewIframe}
+            />
+          ) : (
+            <pre className={styles.codeBlock}>{code}</pre>
+          )}
         </div>
       );
       lastIndex = match.index + match[0].length;
@@ -158,7 +171,8 @@ const ProjectChat = ({ onAcceptCode }) => {
                     size="small"
                     className={styles.acceptButton}
                     onClick={() => handleAccept(item.id)}
-                  />
+                  >
+                  </Button>
                 )}
               </div>
               {item.sender === 'User' && (
