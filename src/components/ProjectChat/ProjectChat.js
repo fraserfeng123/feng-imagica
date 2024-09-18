@@ -47,6 +47,8 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList }) => {
       setIsLoading(true);
       setIsTyping(true);
 
+      userMsg.content = `请帮我用html实现${userMsg.content}`;
+
       try {
         const response = await fetch('http://openai-proxy.brain.loocaa.com/v1/chat/completions', {
           method: 'POST',

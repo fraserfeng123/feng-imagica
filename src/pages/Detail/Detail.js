@@ -65,16 +65,14 @@ const Detail = () => {
             {isMobileProject ? (
               <div className={styles.iphoneModel}>
                 <div className={styles.iphoneScreen}>
-                  <div className={styles.appPreview}>
-                    {previewCode ? (
-                      <CodePreview code={previewCode} />
-                    ) : (
-                      <>
-                        <h2>项目预览</h2>
-                        <p>{project.description}</p>
-                      </>
-                    )}
-                  </div>
+                  {previewCode ? (
+                    <CodePreview code={previewCode} />
+                  ) : (
+                    <>
+                      <h2>项目预览</h2>
+                      <p>{project.description}</p>
+                    </>
+                  )}
                 </div>
                 <div className={styles.iphoneNotch}></div>
               </div>
