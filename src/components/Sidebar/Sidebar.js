@@ -16,13 +16,13 @@ const Sidebar = ({ theme = 'light' }) => {
         className={styles.menu}
       >
         <Menu.Item key="1" icon={<FolderOutlined />} className={styles.menuItem}>
-          所有项目
+          My Projects
         </Menu.Item>
         <Menu.Item key="2" icon={<StarOutlined />} className={styles.menuItem}>
-          我的收藏
+          My Favorites
         </Menu.Item>
         <Menu.Item key="3" icon={<TeamOutlined />} className={styles.menuItem}>
-          我的团队
+          My Team
         </Menu.Item>
       </Menu>
     </Sider>

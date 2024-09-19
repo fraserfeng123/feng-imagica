@@ -1,0 +1,390 @@
+.creationGuide {
+  height: 100vh;
+  display: flex;
+  box-sizing: border-box;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #000;
+  color: #fff;
+  text-align: center;
+  padding: 2rem;
+}
+
+.stepIndicator {
+  display: flex;
+  justify-content: space-between;
+  width: 80%;
+  max-width: 600px;
+  margin: 2rem 0;
+  position: relative;
+}
+
+.stepIndicator::before {
+  content: '';
+  position: absolute;
+  top: 15px;
+  left: 15%; /* 调整左侧起点 */
+  width: 70%; /* 调整线的长度 */
+  height: 2px;
+  background-color: #333;
+  z-index: 1;
+}
+
+.step {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stepInfo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  background-color: #000;
+  padding: 0 10px;
+  position: relative;
+  z-index: 2;
+}
+
+.stepNumber {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #333;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.stepName {
+  font-size: 0.9rem;
+  color: #999;
+}
+
+.step.active .stepNumber {
+  background-color: #00ffff;
+  color: #000;
+}
+
+.step.active .stepName {
+  color: #00ffff;
+}
+
+.step.completed .stepNumber {
+  background-color: #00ffff;
+  color: #000;
+}
+
+.step.completed ~ .step::before {
+  background-color: #00ffff;
+}
+
+.stepContent {
+  margin: 0 0 2rem;
+  height: 400px; /* 固定高度 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 600px; /* 修改为600px */
+}
+
+.platformSelection,
+.templateSelection,
+.brandingSelection {
+  width: 600px; /* 修改为600px */
+  height: 400px;
+  margin: 0 auto;
+  overflow-y: auto; /* 允许内容溢出时滚动 */
+}
+
+/* 添加滚动条样式到 .stepContent */
+.stepContent::-webkit-scrollbar {
+  width: 8px;
+}
+
+.stepContent::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.stepContent::-webkit-scrollbar-thumb {
+  background-color: #333;
+  border-radius: 4px;
+}
+
+.stepContent::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+
+.navigation {
+  display: flex;
+  justify-content: space-between;
+  width: 80%;
+  max-width: 400px;
+}
+
+.navButton {
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  background-color: #00ffff;
+  color: #000;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.navButton:hover:not(:disabled) {
+  background-color: #fff;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+}
+
+.navButton:disabled {
+  background-color: #333;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.platformSelection h2 {
+  margin-bottom: 2rem;
+}
+
+.platformOptions {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  width: 100%;
+}
+
+.platformOption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  padding: 1.5rem;
+  border: 2px solid #333;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  width: 45%; /* 调整宽度以适应600px的容器 */
+  max-width: 200px;
+}
+
+.platformOption:hover {
+  border-color: #00ffff;
+  background-color: rgba(0, 255, 255, 0.05);
+}
+
+.platformOption.selected {
+  border-color: #00ffff;
+  background-color: rgba(0, 255, 255, 0.1);
+}
+
+.platformOption p {
+  font-size: 1rem;
+  color: #fff;
+  margin-top: 1rem;
+}
+
+.platformIcon {
+  font-size: 3rem;
+  color: #00ffff;
+  margin-bottom: 1rem;
+}
+
+.platformOption img {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  margin-bottom: 1rem;
+}
+
+.platformOption p {
+  font-size: 1rem;
+  color: #fff;
+}
+
+.templateSelection {
+  width: 100%;
+  max-width: 600px; /* 保持与其他步骤一致 */
+  margin: 0 auto;
+}
+
+.templateList {
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 两列平分宽度 */
+  gap: 1rem;
+  width: 600px;
+  padding: 20px;
+  box-sizing: border-box;
+  /* overflow-y: auto; */
+  height: calc(100% - 60px); /* 减去标题的高度 */
+}
+
+.templateItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.templateItem:hover {
+  border-color: #00ffff;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.templateItem img {
+  width: 100%;
+  height: 100px; /* 减小图片高度 */
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.templateItem p {
+  margin: 0;
+  color: #fff;
+  font-size: 0.8rem; /* 减小字体大小 */
+  text-align: center;
+}
+
+/* 添加滚动条样式 */
+.templateList::-webkit-scrollbar {
+  width: 8px;
+}
+
+.templateList::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.templateList::-webkit-scrollbar-thumb {
+  background-color: #333;
+  border-radius: 4px;
+}
+
+.templateList::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+
+.brandingSelection {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.brandingForm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  width: 300px; /* 设置宽度为300px */
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.formGroup label {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  color: #fff;
+}
+
+.formGroup input[type="text"] {
+  width: 100%;
+  padding: 0.8rem;
+  box-sizing: border-box;
+  font-size: 1rem;
+  background-color: #333;
+  border: 1px solid #555;
+  border-radius: 4px;
+  color: #fff;
+}
+
+.formGroup input[type="color"] {
+  width: 100%;
+  height: 40px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.templateItem.selected {
+  border-color: #00ffff;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.fadeIn {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.bounceIn {
+  animation: bounceIn 0.5s ease-in-out;
+}
+
+.scaleOnHover {
+  transition: transform 0.3s ease-in-out;
+}
+
+.scaleOnHover:hover {
+  transform: scale(1.05);
+}
+
+.pulseOnHover {
+  transition: transform 0.3s ease-in-out;
+}
+
+.pulseOnHover:hover:not(:disabled) {
+  animation: pulse 0.5s infinite alternate;
+}
+
+.slideInFromLeft {
+  animation: slideInFromLeft 0.5s ease-in-out;
+}
+
+.slideInFromRight {
+  animation: slideInFromRight 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0.1); opacity: 0; }
+  60% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+@keyframes pulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.05); }
+}
+
+@keyframes slideInFromLeft {
+  from { transform: translateX(-50px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInFromRight {
+  from { transform: translateX(50px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}

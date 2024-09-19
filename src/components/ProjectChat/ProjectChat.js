@@ -5,15 +5,16 @@ import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import js from 'react-syntax-highlighter/dist/esm/languages/hljs/javascript';
 import { atomOneDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import styles from './ProjectChat.module.css';
+import { sendMessageToAI } from '../../services/chatService'; // 引入服务
 
 SyntaxHighlighter.registerLanguage('javascript', js);
 
 const { TextArea } = Input;
 const { Text } = Typography;
 
-const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList }) => {
+const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code }) => {
   const [messages, setMessages] = useState(initialChatList.length > 0 ? initialChatList : [
-    { id: 1, sender: 'System', content: '欢迎来到Imagica！赶紧和我聊天实现你的应用吧。', time: '10:00' },
+    { id: 1, sender: 'System', content: 'Welcome,What would you like to build today?', time: '10:00' },
   ]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -32,8 +33,6 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList }) => {
     onUpdateChatList(messages);
   }, [messages, onUpdateChatList]);
 
-  console.log(messages);
-
   const handleSend = async () => {
     if (newMessage.trim() && !isLoading) {
       const userMsg = {
@@ -47,37 +46,15 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList }) => {
       setIsLoading(true);
       setIsTyping(true);
 
-      userMsg.content = `请帮我用html实现${userMsg.content}`;
+      const copyUserMsg = JSON.parse(JSON.stringify(userMsg));
+      if(messages.length === 1) {
+        copyUserMsg.content = "基于已有的html代码```" + code.code + "```结合我最新的需求做修改,并且返回我完整的html代码,最新的需求是：" + userMsg.content;
+      } else {
+        copyUserMsg.content = "请使用html实现并返回我完整的html代码:" + userMsg.content;
+      }
 
       try {
-        const response = await fetch('http://openai-proxy.brain.loocaa.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer DlJYSkMVj1x4zoe8jZnjvxfHG6z5yGxK'
-          },
-          body: JSON.stringify({
-            model: 'gpt-3.5-turbo',
-            messages: [...messages, userMsg].map(msg => ({
-              role: msg.sender.toLowerCase(),
-              content: msg.content
-            }))
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error('网络响应不正常');
-        }
-
-        const data = await response.json();
-        let content = data.choices[0].message.content;
-        
-        // 替换特定文字
-        content = content.replace(
-          "HTML代码",
-          "预览图"
-        );
-
+        const content = await sendMessageToAI(messages, copyUserMsg); // 调用服务
         const systemMsg = {
           id: messages.length + 2,
           sender: 'System',
@@ -152,7 +129,7 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList }) => {
   };
 
   return (
-    <Card title="项目聊天" className={styles.chatBox} bodyStyle={{ padding: 0, height: '100%' }}>
+    <Card title="Chat" className={styles.chatBox} bodyStyle={{ padding: 0, height: '100%' }}>
       <List
         className={styles.messageList}
         itemLayout="horizontal"
@@ -196,7 +173,7 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList }) => {
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder="输入您的应用设计想法..."
+          placeholder="Please enter your message here"
           autoSize={{ minRows: 1, maxRows: 4 }}
           className={styles.input}
           disabled={isLoading}

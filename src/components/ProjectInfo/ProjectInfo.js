@@ -21,7 +21,7 @@ const ProjectInfo = ({ project, getProjectTypeIcon }) => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } else {
-      alert('没有可下载的代码');
+      alert('No code available to download');
     }
   };
 
@@ -33,8 +33,6 @@ const ProjectInfo = ({ project, getProjectTypeIcon }) => {
             <Title level={4} className={styles.projectTitle}>{project.name}</Title>
             <Space size="small" style={{ lineHeight: '28px' }}>
               <Tag icon={getProjectTypeIcon(project.type)} color="blue">{project.type.toUpperCase()}</Tag>
-              {/* <Tag icon={<TeamOutlined />} color="green">{project.members} 成员</Tag> */}
-              <Tag icon={<CalendarOutlined />} color="orange">创建于 2023-06-15</Tag>
             </Space>
           </Space>
         </Col>
@@ -50,9 +48,9 @@ const ProjectInfo = ({ project, getProjectTypeIcon }) => {
               icon={<DownloadOutlined />} 
               onClick={downloadCode}
             >
-              下载代码
+              Download Code
             </Button>
-            <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/projects')}>返回</Button>
+            <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/projects')}>Back</Button>
           </Space>
         </Col>
       </Row>

@@ -1,8 +1,8 @@
 import React from 'react';
 import { Provider } from 'react-redux';
-import { store } from './redux/store';
+import { store } from './redux/store'; // 确保你有这个文件
 import AppRouter from './router';
-import './App.css';
+// 其他必要的导入...
 
 function App() {
   return (

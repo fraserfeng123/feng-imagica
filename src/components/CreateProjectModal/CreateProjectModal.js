@@ -1,70 +1,65 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { Modal, Form, Input, Select } from 'antd';
 import { closeModal, createProject } from '../../redux/projectSlice';
 
 const { Option } = Select;
 
-const CreateProjectModal = () => {
+const CreateProjectModal = ({ isOpen }) => {
   const [form] = Form.useForm();
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const { isModalVisible, projects } = useSelector(state => state.project);
 
-  const handleOk = () => {
-    console.log('handleOk called');
-    form.validateFields().then(values => {
-      console.log('Form values:', values);
-      dispatch(createProject(values));
-      console.log('Project created');
-      form.resetFields();
-      const newProjectId = projects.length + 1;
-      navigate(`/detail/${newProjectId}`);
-    }).catch(info => {
-      console.log('Validate Failed:', info);
-    });
-  };
-
-  const handleCancel = () => {
-    console.log('handleCancel called');
-    dispatch(closeModal());
+  const handleSubmit = (values) => {
+    dispatch(createProject(values));
     form.resetFields();
   };
 
   return (
     <Modal
-      title="新建项目"
-      open={isModalVisible}
-      onOk={handleOk}
-      onCancel={handleCancel}
-      okText="确定"
-      cancelText="取消"
+      title="Create New Project"
+      open={isOpen}
+      onOk={() => form.submit()}
+      onCancel={() => dispatch(closeModal())}
+      okText="Confirm"
+      cancelText="Cancel"
     >
-      <Form form={form} layout="vertical">
+      <Form form={form} layout="vertical" onFinish={handleSubmit}>
         <Form.Item
           name="name"
-          label="项目名称"
-          rules={[{ required: true, message: '请输入项目名称' }]}
+          label="Project Name"
+          rules={[{ required: true, message: 'Please enter project name' }]}
         >
           <Input />
         </Form.Item>
         <Form.Item
           name="type"
-          label="项目类型"
-          rules={[{ required: true, message: '请选择项目类型' }]}
+          label="Project Type"
+          rules={[{ required: true, message: 'Please select project type' }]}
         >
           <Select>
-            <Option value="web">网页</Option>
-            <Option value="wechat">微信小程序</Option>
-            <Option value="mobile">移动应用</Option>
+            <Option value="web">Web</Option>
+            <Option value="mobile">Mobile App</Option>
           </Select>
         </Form.Item>
         <Form.Item
           name="description"
-          label="项目备注"
+          label="Project Description"
         >
           <Input.TextArea />
+        </Form.Item>
+        <Form.Item
+          name="primaryColor"
+          label="Primary Color"
+          initialValue="#00ffff"
+        >
+          <Input type="color" />
+        </Form.Item>
+        <Form.Item
+          name="secondaryColor"
+          label="Secondary Color"
+          initialValue="#ffffff"
+        >
+          <Input type="color" />
         </Form.Item>
       </Form>
     </Modal>

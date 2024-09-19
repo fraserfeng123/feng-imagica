@@ -1,85 +1,54 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Layout, Card, Row, Col, Button, Avatar, Space } from 'antd';
-import { EllipsisOutlined, PlusOutlined, GlobalOutlined, WechatOutlined, MobileOutlined } from '@ant-design/icons';
-import { openModal } from '../../redux/projectSlice';
-import CreateProjectModal from '../CreateProjectModal/CreateProjectModal';
+import { Button, List, Card } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import styles from './ProjectContent.module.css';
 
-const { Content } = Layout;
-const { Meta } = Card;
-
 const ProjectContent = () => {
-  const dispatch = useDispatch();
+  const projects = useSelector(state => state.project.projects);
   const navigate = useNavigate();
-  const { projects } = useSelector(state => state.project);
 
-  const showModal = () => {
-    dispatch(openModal());
-  };
-
-  const handleProjectClick = (id) => {
-    navigate(`/detail/${id}`);
-  };
-
-  const getProjectTypeIcon = (type) => {
-    switch(type) {
-      case 'web':
-        return <GlobalOutlined />;
-      case 'wechat':
-        return <WechatOutlined />;
-      case 'mobile':
-        return <MobileOutlined />;
-      default:
-        return null;
-    }
+  const handleCreateProject = () => {
+    navigate('/creation-guide');
   };
 
   return (
-    <Layout className={styles.contentLayout}>
-      <Content className={styles.content}>
-        <div className={styles.header}>
-          <h1 className={styles.title}>所有项目</h1>
-          <Button type="primary" onClick={showModal} icon={<PlusOutlined />}>新建项目</Button>
-        </div>
-        <Row gutter={[16, 16]}>
-          {projects.map((project) => (
-            <Col xs={24} sm={12} md={8} lg={6} key={project.id}>
-              <Card
-                cover={
-                  <div className={styles.cardCover}>
-                    <Avatar.Group
-                      maxCount={2}
-                      maxStyle={{ color: '#f56a00', backgroundColor: '#fde3cf' }}
-                    >
-                      {[...Array(project.members)].map((_, index) => (
-                        <Avatar key={index} style={{ backgroundColor: '#f56a00' }}>U</Avatar>
-                      ))}
-                    </Avatar.Group>
-                  </div>
-                }
-                actions={[
-                  <EllipsisOutlined key="ellipsis" />,
-                ]}
-                onClick={() => handleProjectClick(project.id)}
-              >
-                <Meta
-                  title={
-                    <Space>
-                      {getProjectTypeIcon(project.type)}
-                      {project.name}
-                    </Space>
-                  }
-                  description={project.description}
-                />
-              </Card>
-            </Col>
-          ))}
-        </Row>
-        <CreateProjectModal />
-      </Content>
-    </Layout>
+    <div className={styles.projectContent}>
+      <div className={styles.header}>
+        <h2>My Projects</h2>
+        <Button 
+          type="primary" 
+          icon={<PlusOutlined />} 
+          onClick={handleCreateProject}
+        >
+          Create New Project
+        </Button>
+      </div>
+      <List
+        grid={{ gutter: 16, column: 3 }}
+        dataSource={projects}
+        renderItem={project => (
+          <List.Item>
+            <Card 
+              title={
+                <div className={styles.cardTitle}>
+                  <div 
+                    className={styles.colorIndicator} 
+                    style={{ backgroundColor: project.primaryColor }}
+                  />
+                  {project.name}
+                </div>
+              }
+              extra={<a onClick={() => navigate(`/detail/${project.id}`)}>View</a>}
+            >
+              <p>{project.description}</p>
+              <p>Type: {project.type === 'web' ? 'Web' : 'Mobile App'}</p>
+            </Card>
+          </List.Item>
+        )}
+      />
+    </div>
   );
 };
 

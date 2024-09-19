@@ -3,7 +3,13 @@ import styles from './CodePreview.module.css';
 
 const CodePreview = ({ code }) => {
   if (!code) {
-    return <div className={styles.previewContainer}>暂无预览内容</div>;
+    return <div className={styles.previewContainer}>
+      <iframe
+        srcDoc={`<html><body></body></html>`}
+        title="HTML Preview"
+        className={styles.previewIframe}
+      />
+    </div>;
   }
 
   return (

@@ -65,14 +65,7 @@ const Detail = () => {
             {isMobileProject ? (
               <div className={styles.iphoneModel}>
                 <div className={styles.iphoneScreen}>
-                  {previewCode ? (
-                    <CodePreview code={previewCode} />
-                  ) : (
-                    <>
-                      <h2>项目预览</h2>
-                      <p>{project.description}</p>
-                    </>
-                  )}
+                  <CodePreview code={previewCode} />
                 </div>
                 <div className={styles.iphoneNotch}></div>
               </div>
@@ -84,20 +77,14 @@ const Detail = () => {
                   <span className={styles.browserButton}></span>
                 </div>
                 <div className={styles.browserContent}>
-                  {previewCode ? (
-                    <CodePreview code={previewCode} />
-                  ) : (
-                    <>
-                      <h2>项目预览</h2>
-                      <p>{project.description}</p>
-                    </>
-                  )}
+                  <CodePreview code={previewCode} />
                 </div>
               </div>
             )}
           </Content>
           <Sider width={500} theme='light' className={styles.chatSider}>
             <ProjectChat 
+              code={previewCode}
               onAcceptCode={handleAcceptCode} 
               initialChatList={project.chatList}
               onUpdateChatList={handleUpdateChatList}
