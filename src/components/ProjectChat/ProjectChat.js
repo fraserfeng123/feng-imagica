@@ -57,32 +57,67 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code }) 
         console.log("Sending message:", copyUserMsg);
         const reader = await sendMessage(messages, copyUserMsg);
         let content = '';
-        while (true) {
+        let systemMessageAdded = false;
+        let buffer = '';
+
+        const processChunk = async () => {
           const { done, value } = await reader.read();
-          console.log('done', done)
-          const chunk = new TextDecoder().decode(value);
-          const jsonMatch = chunk.match(/data: (.+)/);
-          if (jsonMatch) {
-            const jsonData = JSON.parse(jsonMatch[1]);
-            content += jsonData.choices[0].delta.content || '';
-            console.log("Received chunk:", jsonData.choices[0].delta.content);
-          }
-          // 更新消息内容
-          setMessages(prevMessages => {
-            const lastMessage = prevMessages[prevMessages.length - 1];
-            if (lastMessage.sender === 'System') {
-              const updatedLastMessage = { ...lastMessage, content: content };
-              return [...prevMessages.slice(0, -1), updatedLastMessage];
-            } else {
-              return [...prevMessages, { id: prevMessages.length + 1, sender: 'System', content: content, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }];
-            }
-          });
-          if (chunk.includes('[DONE]')) {
+          if (done) {
             setIsLoading(false);
             setIsTyping(false);
-            break;
-          };
-        }
+            return;
+          }
+
+          const chunk = new TextDecoder().decode(value);
+          buffer += chunk;
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';  // 保留最后一行（可能不完整）
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(5).trim();
+              if (data === '[DONE]') {
+                setIsLoading(false);
+                setIsTyping(false);
+                return;
+              }
+              try {
+                const jsonData = JSON.parse(data);
+                if (jsonData.choices && jsonData.choices[0].delta.content) {
+                  content += jsonData.choices[0].delta.content;
+                  console.log("Received chunk:", jsonData.choices[0].delta.content);
+                  
+                  setMessages(prevMessages => {
+                    if (!systemMessageAdded) {
+                      systemMessageAdded = true;
+                      return [...prevMessages, { 
+                        id: prevMessages.length + 1, 
+                        sender: 'System', 
+                        content: content, 
+                        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+                      }];
+                    } else {
+                      return prevMessages.map((msg, index) => {
+                        if (index === prevMessages.length - 1) {
+                          return { ...msg, content: content };
+                        }
+                        return msg;
+                      });
+                    }
+                  });
+                }
+              } catch (error) {
+                console.error('解析JSON时出错:', error, 'Raw data:', data);
+                // 继续处理下一行，不中断整个过程
+              }
+            }
+          }
+
+          // 继续处理下一个数据块
+          await processChunk();
+        };
+
+        await processChunk();
         console.log("Final content:", content);
       } catch (error) {
         if (error.message !== 'Request canceled') {
