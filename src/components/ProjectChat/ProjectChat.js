@@ -5,8 +5,7 @@ import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import js from 'react-syntax-highlighter/dist/esm/languages/hljs/javascript';
 import { atomOneDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import styles from './ProjectChat.module.css';
-import { sendMessage } from '../../services/chatService'; // 引入服务
-import { cancelRequest } from '../../services/chatService'; // 添加这行
+import { sendMessage, cancelRequest } from '../../services/chatService';
 
 SyntaxHighlighter.registerLanguage('javascript', js);
 
@@ -48,25 +47,43 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code }) 
       setIsTyping(true);
 
       const copyUserMsg = JSON.parse(JSON.stringify(userMsg));
-      if(messages.length === 1) {
+      if(messages.length === 1 && code.code.length > 0) {
         copyUserMsg.content = "基于已有的html代码```" + code.code + "```结合我最新的需求做修改,并且返回我完整的html代码,最新的需求是：" + userMsg.content;
       } else {
         copyUserMsg.content = "请使用html实现并返回我完整的html代码:" + userMsg.content;
       }
 
       try {
-        const content = await sendMessage(messages, copyUserMsg);
-        // 检查是否已经取消了请求
-        if (!isLoading) {
-          return; // 如果已经取消了请求,就不再继续处理
+        console.log("Sending message:", copyUserMsg);
+        const reader = await sendMessage(messages, copyUserMsg);
+        let content = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          console.log('done', done)
+          const chunk = new TextDecoder().decode(value);
+          const jsonMatch = chunk.match(/data: (.+)/);
+          if (jsonMatch) {
+            const jsonData = JSON.parse(jsonMatch[1]);
+            content += jsonData.choices[0].delta.content || '';
+            console.log("Received chunk:", jsonData.choices[0].delta.content);
+          }
+          // 更新消息内容
+          setMessages(prevMessages => {
+            const lastMessage = prevMessages[prevMessages.length - 1];
+            if (lastMessage.sender === 'System') {
+              const updatedLastMessage = { ...lastMessage, content: content };
+              return [...prevMessages.slice(0, -1), updatedLastMessage];
+            } else {
+              return [...prevMessages, { id: prevMessages.length + 1, sender: 'System', content: content, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }];
+            }
+          });
+          if (chunk.includes('[DONE]')) {
+            setIsLoading(false);
+            setIsTyping(false);
+            break;
+          };
         }
-        const systemMsg = {
-          id: messages.length + 2,
-          sender: 'System',
-          content: content,
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
-        setMessages(prevMessages => [...prevMessages, systemMsg]);
+        console.log("Final content:", content);
       } catch (error) {
         if (error.message !== 'Request canceled') {
           console.error('发送消息时出错:', error);
