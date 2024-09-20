@@ -30,15 +30,21 @@ const projectSlice = createSlice({
       saveProjectsToLocalStorage(state.projects);
     },
     updateProject: (state, action) => {
-      const index = state.projects.findIndex(project => project.id === action.payload.id);
-      if (index !== -1) {
-        state.projects[index] = {
-          ...state.projects[index],
-          ...action.payload,
-          type: action.payload.type === 'mobile' ? 'mobile' : 'web',
-        };
-        saveProjectsToLocalStorage(state.projects);
+      if (action.payload._delete) {
+        // 如果是删除操作
+        state.projects = state.projects.filter(project => project.id !== action.payload.id);
+      } else {
+        // 如果是更新操作
+        const index = state.projects.findIndex(project => project.id === action.payload.id);
+        if (index !== -1) {
+          state.projects[index] = {
+            ...state.projects[index],
+            ...action.payload,
+            type: action.payload.type === 'mobile' ? 'mobile' : 'web',
+          };
+        }
       }
+      saveProjectsToLocalStorage(state.projects);
     },
     openModal: (state) => {
       state.isModalVisible = true;

@@ -5,7 +5,8 @@ import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import js from 'react-syntax-highlighter/dist/esm/languages/hljs/javascript';
 import { atomOneDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import styles from './ProjectChat.module.css';
-import { sendMessageToAI } from '../../services/chatService'; // 引入服务
+import { sendMessage } from '../../services/chatService'; // 引入服务
+import { cancelRequest } from '../../services/chatService'; // 添加这行
 
 SyntaxHighlighter.registerLanguage('javascript', js);
 
@@ -54,7 +55,11 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code }) 
       }
 
       try {
-        const content = await sendMessageToAI(messages, copyUserMsg); // 调用服务
+        const content = await sendMessage(messages, copyUserMsg);
+        // 检查是否已经取消了请求
+        if (!isLoading) {
+          return; // 如果已经取消了请求,就不再继续处理
+        }
         const systemMsg = {
           id: messages.length + 2,
           sender: 'System',
@@ -63,8 +68,10 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code }) 
         };
         setMessages(prevMessages => [...prevMessages, systemMsg]);
       } catch (error) {
-        console.error('发送消息时出错:', error);
-        // 这里可以添加错误处理逻辑,比如显示错误消息给用户
+        if (error.message !== 'Request canceled') {
+          console.error('发送消息时出错:', error);
+          // 这里可以添加错误处理逻辑,比如显示错误消息给用户
+        }
       } finally {
         setIsLoading(false);
         setIsTyping(false);
@@ -128,6 +135,12 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code }) 
     }
   };
 
+  const handleCancel = () => {
+    cancelRequest();
+    setIsLoading(false);
+    setIsTyping(false);
+  };
+
   return (
     <Card title="Chat" className={styles.chatBox} bodyStyle={{ padding: 0, height: '100%' }}>
       <List
@@ -164,7 +177,8 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code }) 
       {isTyping && (
         <div className={styles.typingIndicator}>
           <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
-          <Text style={{ marginLeft: 8 }}>AI正在思考中...</Text>
+          <Text style={{ marginLeft: 8 }}>AI is thinking...</Text>
+          <Button onClick={handleCancel} style={{ marginLeft: 8 }}>Cancel Generation</Button>
         </div>
       )}
       <div ref={messagesEndRef} />

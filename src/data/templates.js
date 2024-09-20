@@ -392,6 +392,13 @@ audio.addEventListener('ended', function() {
     </div>
 
 </body></html>`,
+  },
+  {
+    id: 5,
+    name: "Blank",
+    type: "mobile",
+    thumbnail: "https://picsum.photos/200/300?random=13",
+    code: ``,
   }
 ];
 

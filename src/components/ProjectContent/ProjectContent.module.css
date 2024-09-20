@@ -93,3 +93,13 @@
   border-radius: 50%;
   margin-right: 8px;
 }
+
+.projectCard {
+  position: relative;
+}
+
+.deleteButton {
+  display: inline-block;
+  margin-left: 10px;
+  cursor: pointer;
+}

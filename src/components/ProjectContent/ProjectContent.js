@@ -1,16 +1,26 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { Button, List, Card } from 'antd';
+import { List, Card, Button } from 'antd';
+import { useSelector, useDispatch } from 'react-redux';
 import { PlusOutlined } from '@ant-design/icons';
+import { updateProject } from '../../redux/projectSlice';
+import { useNavigate } from 'react-router-dom';
 import styles from './ProjectContent.module.css';
 
-const ProjectContent = () => {
+const ProjectContent = ({ onProjectSelect }) => {
   const projects = useSelector(state => state.project.projects);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleCreateProject = () => {
     navigate('/creation-guide');
+  };
+
+  const handleDelete = (e, projectId) => {
+    e.stopPropagation(); // 阻止事件冒泡到卡片的点击事件
+    dispatch(updateProject({
+      id: projectId,
+      _delete: true
+    }));
   };
 
   return (
@@ -28,22 +38,32 @@ const ProjectContent = () => {
       <List
         grid={{ gutter: 16, column: 3 }}
         dataSource={projects}
-        renderItem={project => (
+        renderItem={item => (
           <List.Item>
             <Card 
               title={
                 <div className={styles.cardTitle}>
                   <div 
                     className={styles.colorIndicator} 
-                    style={{ backgroundColor: project.primaryColor }}
+                    style={{ backgroundColor: item.primaryColor }}
                   />
-                  {project.name}
+                  {item.name}
                 </div>
               }
-              extra={<a onClick={() => navigate(`/detail/${project.id}`)}>View</a>}
+              extra={
+                <span>
+                  <a onClick={() => navigate(`/detail/${item.id}`)}>View</a>
+                  <span
+                    className={styles.deleteButton}
+                    onClick={(e) => handleDelete(e, item.id)}
+                  >
+                    Delete
+                  </span>
+                </span>
+              }
             >
-              <p>{project.description}</p>
-              <p>Type: {project.type === 'web' ? 'Web' : 'Mobile App'}</p>
+              <p>{item.description}</p>
+              <p>Type: {item.type === 'web' ? 'Web' : 'Mobile App'}</p>
             </Card>
           </List.Item>
         )}
