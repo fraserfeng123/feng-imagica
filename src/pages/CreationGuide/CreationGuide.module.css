@@ -220,7 +220,7 @@
 .templateList {
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 两列平分宽度 */
+  grid-template-columns: repeat(3, 1fr); /* 两列平分宽�� */
   gap: 1rem;
   width: 600px;
   padding: 20px;
@@ -387,4 +387,22 @@
 @keyframes slideInFromRight {
   from { transform: translateX(50px); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
+}
+
+.container {
+  padding: 20px;
+}
+
+.colorPickerContainer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.colorInput {
+  width: 100px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
 }

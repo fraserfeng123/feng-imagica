@@ -104,6 +104,7 @@ const Detail = () => {
           </Content>
           <Sider width={500} theme='light' className={styles.chatSider}>
             <ProjectChat 
+              themeColor={project.primaryColor}
               code={previewCode}
               onAcceptCode={handleAcceptCode} 
               initialChatList={project.chatList}

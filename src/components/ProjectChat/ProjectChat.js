@@ -12,7 +12,7 @@ SyntaxHighlighter.registerLanguage('javascript', js);
 const { TextArea } = Input;
 const { Text } = Typography;
 
-const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code }) => {
+const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, themeColor }) => {
   const [messages, setMessages] = useState(initialChatList.length > 0 ? initialChatList : [
     { id: 1, sender: 'System', content: 'Welcome,What would you like to build today?', time: '10:00' },
   ]);
@@ -49,11 +49,11 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code }) 
 
       const copyUserMsg = JSON.parse(JSON.stringify(userMsg));
       if(messages.length === 1 && code.code.length > 0) {
-        copyUserMsg.content = "基于已有的html代码```" + code.code + "```结合我最新的需求做修改,并且返回我完整的html代码,最新的需求是：" + userMsg.content + ",要求样式美观和现代化";
+        copyUserMsg.content = "基于已有的html代码```" + code.code + "```结合我最新的需求做修改,并且返回我完整的html代码,最新的需求是：" + userMsg.content + ",要求样式美观和现代化，网页主题色是" + themeColor;
       } else if(rollBack) {
-        copyUserMsg.content = "我修改了一些代码，修改后的代码是```" + code.code + "```，请使用我修改后的代码实现并返回我完整的html代码:" + userMsg.content + ",要求新增的代码样式美观和现代化";;
+        copyUserMsg.content = "我修改了一些代码，修改后的代码是```" + code.code + "```，请使用我修改后的代码实现并返回我完整的html代码:" + userMsg.content + ",要求新增的代码样式美观和现代化，网页主题色是" + themeColor;
       } else {
-        copyUserMsg.content = "请使用html实现并返回我完整的html代码，网页要求美观和现代化：" + userMsg.content;
+        copyUserMsg.content = "请使用html实现并返回我完整的html代码，网页要求美观和现代化，网页主题色使用"+ themeColor +"：" + userMsg.content;
       }
 
       try {
