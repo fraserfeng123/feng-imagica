@@ -1,5 +1,3 @@
-import axios from 'axios';
-
 let controller = null;
 
 export const sendMessage = async (messages, newMessage) => {
