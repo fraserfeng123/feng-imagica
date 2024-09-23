@@ -37,7 +37,6 @@ export const sendMessage = async (messages, newMessage) => {
     return response.body.getReader();
   } catch (error) {
     if (error.name === 'AbortError') {
-      console.log('请求被取消:', error.message);
     } else {
       throw error;
     }

@@ -49,15 +49,14 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code }) 
 
       const copyUserMsg = JSON.parse(JSON.stringify(userMsg));
       if(messages.length === 1 && code.code.length > 0) {
-        copyUserMsg.content = "基于已有的html代码```" + code.code + "```结合我最新的需求做修改,并且返回我完整的html代码,最新的需求是：" + userMsg.content;
+        copyUserMsg.content = "基于已有的html代码```" + code.code + "```结合我最新的需求做修改,并且返回我完整的html代码,最新的需求是：" + userMsg.content + ",要求样式美观和现代化";
       } else if(rollBack) {
-        copyUserMsg.content = "我修改了一些代码，修改后的代码是```" + code.code + "```，请使用我修改后的代码实现并返回我完整的html代码:" + userMsg.content;
+        copyUserMsg.content = "我修改了一些代码，修改后的代码是```" + code.code + "```，请使用我修改后的代码实现并返回我完整的html代码:" + userMsg.content + ",要求新增的代码样式美观和现代化";;
       } else {
-        copyUserMsg.content = "请使用html实现并返回我完整的html代码:" + userMsg.content;
+        copyUserMsg.content = "请使用html实现并返回我完整的html代码，网页要求美观和现代化：" + userMsg.content;
       }
 
       try {
-        console.log("Sending message:", copyUserMsg);
         const reader = await sendMessage(messages, copyUserMsg);
         let content = '';
         let systemMessageAdded = false;
@@ -88,7 +87,6 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code }) 
                 const jsonData = JSON.parse(data);
                 if (jsonData.choices && jsonData.choices[0].delta.content) {
                   content += jsonData.choices[0].delta.content;
-                  console.log("Received chunk:", jsonData.choices[0].delta.content);
                   
                   setMessages(prevMessages => {
                     if (!systemMessageAdded) {
@@ -121,7 +119,6 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code }) 
         };
 
         await processChunk();
-        console.log("Final content:", content);
       } catch (error) {
         if (error.message !== 'Request canceled') {
           console.error('发送消息时出错:', error);
