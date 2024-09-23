@@ -19,6 +19,7 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code }) 
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [rollBack, setRollBack] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -49,6 +50,8 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code }) 
       const copyUserMsg = JSON.parse(JSON.stringify(userMsg));
       if(messages.length === 1 && code.code.length > 0) {
         copyUserMsg.content = "基于已有的html代码```" + code.code + "```结合我最新的需求做修改,并且返回我完整的html代码,最新的需求是：" + userMsg.content;
+      } else if(rollBack) {
+        copyUserMsg.content = "我修改了一些代码，修改后的代码是```" + code.code + "```，请使用我修改后的代码实现并返回我完整的html代码:" + userMsg.content;
       } else {
         copyUserMsg.content = "请使用html实现并返回我完整的html代码:" + userMsg.content;
       }
@@ -127,17 +130,20 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code }) 
       } finally {
         setIsLoading(false);
         setIsTyping(false);
+        setRollBack(false);
       }
     }
   };
 
   const handleAccept = (messageId) => {
     const message = messages.find(msg => msg.id === messageId);
+    const isLastIndex = messages[messages.length - 1].id === messageId;
     if (message && message.content.includes('```')) {
       const codeMatch = message.content.match(/```(\w+)?\n([\s\S]*?)```/);
       if (codeMatch) {
         const [, language, code] = codeMatch;
         onAcceptCode({ language: language || 'html', code: code.trim() });
+        setRollBack(!isLastIndex);
       }
     }
   };

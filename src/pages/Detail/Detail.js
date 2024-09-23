@@ -6,6 +6,7 @@ import { MobileOutlined, GlobalOutlined, WechatOutlined } from '@ant-design/icon
 import ProjectInfo from '../../components/ProjectInfo/ProjectInfo';
 import ProjectChat from '../../components/ProjectChat/ProjectChat';
 import CodePreview from '../../components/CodePreview/CodePreview';
+import CodeEditor from '../../components/CodeEditor/CodeEditor';
 import { updateProjectCode, updateProjectChatList } from '../../redux/projectSlice';
 import styles from './Detail.module.css';
 
@@ -17,7 +18,8 @@ const Detail = () => {
   const project = useSelector(state => 
     state.project.projects.find(p => p.id === parseInt(id))
   );
-  const [previewCode, setPreviewCode] = useState(null);
+  const [previewCode, setPreviewCode] = useState('');
+  const [activeTab, setActiveTab] = useState('preview');
 
   useEffect(() => {
     if (project && project.code) {
@@ -60,26 +62,44 @@ const Detail = () => {
     <Layout className={styles.detailLayout}>
       <Content className={styles.content}>
         <ProjectInfo project={project} getProjectTypeIcon={getProjectTypeIcon} />
+        <div className={styles.tabContainer}>
+          <button
+            className={activeTab === 'preview' ? styles.activeTab : styles.tab}
+            onClick={() => setActiveTab('preview')}
+          >
+            Preview
+          </button>
+          <button
+            className={activeTab === 'code' ? styles.activeTab : styles.tab}
+            onClick={() => setActiveTab('code')}
+          >
+            Code edit
+          </button>
+        </div>
         <Layout className={styles.innerLayout}>
           <Content className={styles.previewArea}>
-            {isMobileProject ? (
-              <div className={styles.iphoneModel}>
-                <div className={styles.iphoneScreen}>
-                  <CodePreview code={previewCode} />
+            {activeTab === 'preview' ? (
+              isMobileProject ? (
+                <div className={styles.iphoneModel}>
+                  <div className={styles.iphoneScreen}>
+                    <CodePreview code={previewCode} />
+                  </div>
+                  <div className={styles.iphoneNotch}></div>
                 </div>
-                <div className={styles.iphoneNotch}></div>
-              </div>
+              ) : (
+                <div className={styles.browserModel}>
+                  <div className={styles.browserToolbar}>
+                    <span className={styles.browserButton}></span>
+                    <span className={styles.browserButton}></span>
+                    <span className={styles.browserButton}></span>
+                  </div>
+                  <div className={styles.browserContent}>
+                    <CodePreview code={previewCode} />
+                  </div>
+                </div>
+              )
             ) : (
-              <div className={styles.browserModel}>
-                <div className={styles.browserToolbar}>
-                  <span className={styles.browserButton}></span>
-                  <span className={styles.browserButton}></span>
-                  <span className={styles.browserButton}></span>
-                </div>
-                <div className={styles.browserContent}>
-                  <CodePreview code={previewCode} />
-                </div>
-              </div>
+              <CodeEditor code={previewCode.code} onSave={handleAcceptCode} />
             )}
           </Content>
           <Sider width={500} theme='light' className={styles.chatSider}>

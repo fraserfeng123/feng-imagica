@@ -16,7 +16,7 @@ const CodePreview = ({ code }) => {
     <div className={styles.previewContainer}>
       {code.language === 'html' ? (
         <iframe
-          srcDoc={`<html><body>${code.code}</body></html>`}
+          srcDoc={`${code.code}`}
           title="HTML Preview"
           className={styles.previewIframe}
         />
