@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>旅游攻略软件</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    color: #333;
+    padding: 20px;
+  }
+  .output {
+    border: 2px solid #00ffff;
+    background-color: #fff;
+    padding: 10px;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+<div>
+  <input type="text" id="destination" placeholder="请输入旅行目的地">
+  <input type="number" id="days" placeholder="计划停留天数">
+  <button onclick="getTravelGuide()">获取旅游攻略</button>
+</div>
+<div class="output"></div>
+<script>
+  async function getTravelGuide() {
+    const destination = document.getElementById("destination").value;
+    const days = document.getElementById("days").value;
+
+    const messages = [{
+      content: `用户输入的目的地是 ${destination}，计划停留 ${days} 天`,
+      role: 'user'
+    }];
+
+    // 调用OpenAI接口，并处理流式返回的数据
+    const response = await fetch('http://openai-proxy.brain.loocaa.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer DlJYSkMVj1x4zoe8jZnjvxfHG6z5yGxK'
+      },
+      body: JSON.stringify({
+        messages: messages,
+        model: 'gpt-3.5-turbo',
+        stream: true
+      })
+    });
+
+    const reader = response.body.getReader();
+    const outputDiv = document.querySelector('.output');
+    let accumulatedOutput = '';
+    let content = '';
+    let buffer = '';
+
+    // 读取数据的函数
+    function read() {
+      return reader.read().then(({ done, value }) => {
+        if (done) {
+          console.log('读取完成');
+          return;
+        }
+
+        const chunk = new TextDecoder().decode(value);
+        buffer += chunk;
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || ''; // 保留最后一行（可能不完整）
+        
+        for (const line of lines) {
+        if (line.startsWith('data: ')) {
+        const data = line.slice(5).trim();
+        if (data === '[DONE]') {
+        setIsLoading(false);
+        setIsTyping(false);
+        return;
+        }
+        try {
+        const jsonData = JSON.parse(data);
+        if (jsonData.choices && jsonData.choices[0].delta.content) {
+        content += jsonData.choices[0].delta.content;
+      outputDiv.innerHTML = content;
+        }
+        } catch (error) {
+        console.error('解析JSON时出错:', error, 'Raw data:', data);
+        // 继续处理下一行，不中断整个过程
+        }
+        }
+        }
+
+        // 继续读取
+        read();
+      }).catch(err => {
+        console.error('读取失败:', err);
+      });
+    }
+
+    // 开始读取流式返回的数据
+    read();
+  }
+</script>
+</body>
+</html>
