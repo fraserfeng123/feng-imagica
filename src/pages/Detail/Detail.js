@@ -20,6 +20,7 @@ const Detail = () => {
   );
   const [previewCode, setPreviewCode] = useState('');
   const [activeTab, setActiveTab] = useState('preview');
+  const [selectedElement, setSelectedElement] = useState(null);
 
   useEffect(() => {
     if (project && project.code) {
@@ -58,6 +59,10 @@ const Detail = () => {
     dispatch(updateProjectChatList({ id: project.id, chatList: newChatList }));
   };
 
+  const handleElementSelect = (elementHTML) => {
+    setSelectedElement(elementHTML);
+  };
+
   return (
     <Layout className={styles.detailLayout}>
       <Content className={styles.content}>
@@ -82,7 +87,7 @@ const Detail = () => {
               isMobileProject ? (
                 <div className={styles.iphoneModel}>
                   <div className={styles.iphoneScreen}>
-                    <CodePreview code={previewCode} />
+                    <CodePreview code={previewCode} onElementSelect={handleElementSelect} />
                   </div>
                   <div className={styles.iphoneNotch}></div>
                 </div>
@@ -94,7 +99,7 @@ const Detail = () => {
                     <span className={styles.browserButton}></span>
                   </div>
                   <div className={styles.browserContent}>
-                    <CodePreview code={previewCode} />
+                    <CodePreview code={previewCode} onElementSelect={handleElementSelect} />
                   </div>
                 </div>
               )
@@ -109,6 +114,8 @@ const Detail = () => {
               onAcceptCode={handleAcceptCode} 
               initialChatList={project.chatList}
               onUpdateChatList={handleUpdateChatList}
+              selectedElement={selectedElement}
+              onElementSelect={handleElementSelect}
             />
           </Sider>
         </Layout>

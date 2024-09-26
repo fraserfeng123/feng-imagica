@@ -6,13 +6,14 @@ import js from 'react-syntax-highlighter/dist/esm/languages/hljs/javascript';
 import { atomOneDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import styles from './ProjectChat.module.css';
 import { sendMessage, cancelRequest } from '../../services/chatService';
+import CodePreview from '../CodePreview/CodePreview';
 
 SyntaxHighlighter.registerLanguage('javascript', js);
 
 const { TextArea } = Input;
 const { Text } = Typography;
 
-const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, themeColor }) => {
+const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, themeColor, selectedElement, onElementSelect }) => {
   const [messages, setMessages] = useState(initialChatList.length > 0 ? initialChatList : [
     { id: 1, sender: 'System', content: 'Welcome,What would you like to build today?', time: '10:00' },
   ]);
@@ -48,13 +49,24 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, th
       setIsTyping(true);
 
       const copyUserMsg = JSON.parse(JSON.stringify(userMsg));
-      if (newMessage.trim().toLowerCase() === 'sounds good') {
-        copyUserMsg.content = "请返回完整的html代码，并使用http://openai-proxy.brain.loocaa.com/v1/chat/completions接口对接,接口请求头使用'Authorization': `Bearer DlJYSkMVj1x4zoe8jZnjvxfHG6z5yGxK`，接口的参数只有messages、model和stream三个字段，stream的值是true,model的值是`gpt-3.5-turbo`，messages是一个数组，数组里是对象，第一项的content应该是描述用户输入的内容，再加上应用的目的是什么，连接成一个字符串，第一项目的role是user,将这些参数传递给openAI接口，接口是流式返回的, 会返回很多次数据，直到返回的数据中包含DONE代表返回结束，每次返回的是一个字符串，每次需要使用正则表达式将字符串中的content的值取出来和之前返回的内容拼接起来当作输出结果，显示在网页上，并且不要使用while来处理逻辑，因为while处理的逻辑会导致数据丢失，要求网页样式美观和现代化和功能可以供用户使用，网页主题色是" + themeColor + "流式返回的数据处理逻辑可以参考下面的格式：```const reader = response.body.getReader();// 读取数据的函数  function read() {  return reader.read().then(({ done, value }) => {  if (done) {  console.log('读取完成'); return;  } console.log(value); // 继续读取 read(); }).catch(err => { console.error('读取失败:', err);});} // 开始读取 read();  ```这样的格式,其中打印的value就是每次返回的字符串";
+      if(messages.length === 1 && code.code.length > 0) {
+        copyUserMsg.content = "基于已有的html代码```" + code.code + "```结合我最新的需求做修改,并且返回我完整的html代码,最新的需求是：" + userMsg.content + ",要求样式美观和现代化，网页主题色是" + themeColor;
+      } else if (rollBack) {
+        copyUserMsg.content = "我修改了一些代码，修改后的代码是```" + code.code + "```，请使用我修改后的代码实现并返回我完整的html代码:" + userMsg.content + ",要求新增的代码样式美观和现代化，网页主题色是" + themeColor;
       } else {
-        copyUserMsg.content = "请根据以下需求返回应用的基本设计结构：" + userMsg.content;
+        copyUserMsg.content = "基于已有的html代码```" + code.code + "```实现，并返回我完整的html代码，网页要求美观和现代化，网页主题色使用"+ themeColor +"：" + userMsg.content;
+      }
+
+      console.log(selectedElement)
+      // 如果有选中的元素，将其添加到消息中
+      if (selectedElement) {
+        copyUserMsg.content += "\n\n上面描述的修改只针对以下是我选中的元素，其他的代码不要变：\n```html\n" + selectedElement + "\n```";
       }
 
       try {
+        // 在调用 sendMessage 之前清空 selectedElement
+        onElementSelect(null);
+        
         const reader = await sendMessage(messages, copyUserMsg);
         let content = '';
         let systemMessageAdded = false;
@@ -240,13 +252,13 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, th
               <Button onClick={handleCancel} style={{ marginLeft: 8 }}>Cancel Generation</Button>
             </div>
           )}
-          {/* <Button 
+          <Button 
             type="text" 
             onClick={handleClearChat}
             className={styles.sendButton}
           >
             clear
-          </Button> */}
+          </Button>
         </div>
       }
       <div ref={messagesEndRef} />
