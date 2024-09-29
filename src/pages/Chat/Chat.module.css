@@ -10,3 +10,10 @@
 .boxShadow {
   box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
 }
+
+.suggestButton {
+  background: linear-gradient(90deg, #8eefea, #5bc8ec 25%, #a093f4 50%, #f286d1 75%, #fa9191) !important;
+  display: inline-block;
+  border-radius: 20px;
+  color: #fff;
+}

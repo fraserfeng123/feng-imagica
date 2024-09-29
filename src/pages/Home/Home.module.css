@@ -1,63 +1,17 @@
-.home {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background-color: #000;
-  color: #fff;
-  overflow: hidden;
-  position: relative;
-}
-.header {
-  display: flex;
+.gradientBackground {
+  background: linear-gradient(-45deg, #1961fc, #16e3f2, #23a6d5, #23d5ab);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
 }
 
-.content {
-  text-align: center;
-  z-index: 1;
-}
-
-.logo {
-  width: 100px;
-  margin-bottom: 2rem;
-  animation: pulse 2s infinite;
-}
-
-.highlight {
-  color: #00ffff;
-  font-weight: bold;
-}
-
-.ctaButton {
-  display: inline-block;
-  padding: 12px 24px;
-  background-color: #00ffff;
-  color: #000;
-  text-decoration: none;
-  font-size: 1.2rem;
-  font-weight: bold;
-  border-radius: 30px;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.ctaButton:hover {
-  background-color: #fff;
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
-}
-
-.backgroundAnimation {
+.gradientOverlay {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(45deg, #000033, #000066, #000099);
-  background-size: 400% 400%;
-  animation: gradientBG 15s ease infinite;
-  opacity: 0.3;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 1;
 }
 
 @keyframes gradientBG {
@@ -69,84 +23,5 @@
   }
   100% {
     background-position: 0% 50%;
-  }
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-/* 添加一些响应式设计 */
-@media (max-width: 768px) {
-  .logo {
-    width: 80px;
-  }
-}
-
-.features {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 4rem;
-  gap: 2rem;
-}
-
-.featureItem {
-  text-align: center;
-  padding: 1.5rem;
-  background: rgba(0, 255, 255, 0.05);
-  border-radius: 15px;
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-  border: 1px solid rgba(0, 255, 255, 0.1);
-  flex: 1;
-  max-width: 250px;
-}
-
-.featureItem:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 10px 20px rgba(0, 255, 255, 0.2);
-  background: rgba(0, 255, 255, 0.1);
-}
-
-.featureIcon {
-  font-size: 3rem;
-  color: #00ffff;
-  margin-bottom: 1.5rem;
-  transition: transform 0.3s ease;
-}
-
-.featureItem:hover .featureIcon {
-  transform: scale(1.2);
-}
-
-.featureItem h3 {
-  color: #ffffff;
-  margin-bottom: 1rem;
-  font-size: 1.4rem;
-}
-
-.featureItem p {
-  color: #e0e0e0;
-  font-size: 1rem;
-  line-height: 1.5;
-}
-
-@media (max-width: 768px) {
-  .features {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .featureItem {
-    max-width: 100%;
-    width: 80%;
   }
 }

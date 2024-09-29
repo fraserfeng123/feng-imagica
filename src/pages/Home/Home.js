@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import styles from './Home.module.css'; // 确保创建了这个CSS模块文件
 
 const Home = () => {
   const [inputValue, setInputValue] = useState('');
@@ -20,8 +21,8 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen pb-20 bg-gradient-to-br from-gray-900 via-indigo-900 to-purple-900 text-gray-100 flex flex-col justify-between items-center relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-indigo-900 to-purple-900 animate-gradient-x"></div>
+    <div className={`min-h-screen pb-20 flex flex-col justify-between items-center relative overflow-hidden ${styles.gradientBackground}`}>
+      <div className={styles.gradientOverlay}></div>
       <header className="w-full flex justify-between items-center p-6 relative z-10">
         <img 
           src="https://dopniceu5am9m.cloudfront.net/natural.ai/assets/svg/logo_white.svg" 

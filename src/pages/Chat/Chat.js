@@ -31,6 +31,10 @@ const Chat = () => {
     }
   }, [location, navigate]);
 
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -65,8 +69,6 @@ const Chat = () => {
           if (line.startsWith('data: ')) {
             const data = line.slice(5).trim();
             if (data === '[DONE]') {
-              // setIsTyping(false);
-              console.log("content", content);
               setMessages(prevMessages => {
                 const newMessages = [...prevMessages];
                 if (newMessages[newMessages.length - 1].sender === 'System') {
@@ -91,6 +93,8 @@ const Chat = () => {
               console.error('解析JSON时出错:', error, 'Raw data:', data);
               // 继续处理下一行，不中断整个过程
             }
+          } else {
+            console.log("-----", line)
           }
         }
 
@@ -112,18 +116,16 @@ const Chat = () => {
     setIsTyping(false);
   };
 
-  console.log(messages)
-
   return (
-    <div className="min-h-screen bg-white text-gray-900 flex flex-col">
-      <header className="w-full flex justify-center items-center p-6">
+    <div className="flex flex-col h-screen bg-white text-gray-900">
+      <header className="w-full flex justify-center items-center p-4">
         <h1 className="text-xl font-bold">Imagica</h1>
       </header>
       <main className="flex-grow overflow-y-auto p-6">
         <div className="max-w-3xl mx-auto">
           <div className={`mb-6 max-w-2xl rounded-lg p-6 ${styles.boxShadow}`}>
-            <h2 className="text-2xl font-bold">Hello 👋 Welcome to Wegic!</h2>
-            <p className="mt-2">I'm Kimmy, your personal website designer assistant, ready to bring your website ideas to life? Let's chat about your vision, and I'll help you build your site from the ground up, just the way you want it!</p>
+            <h2 className="text-2xl font-bold">Hello 👋 Welcome to Imagic!</h2>
+            <p className="mt-2">I'm Imagic, your personal website designer assistant, ready to bring your website ideas to life? Let's chat about your vision, and I'll help you build your site from the ground up, just the way you want it!</p>
           </div>
           <div className={`mb-6 max-w-2xl rounded-lg p-6 ${styles.boxShadow}`}>
             <p className="text-base font-medium">What kind of website would you like to build? 😊</p>
@@ -154,6 +156,12 @@ const Chat = () => {
                 >
                   {message.content}
                 </ReactMarkdown>
+                {(index === 1 || index === 3) && <button className="mt-2 text-sm font-semibold text-gray-500">Suggestion</button>}
+                {(index === 1 || index === 3) && (
+                  <div className="mt-4 space-y-2">
+                    {index === 1 && <p className={`text-xs text-gray-700 pl-4 pr-4 pt-2 pb-2 border border-gray-300 rounded-lg cursor-pointer ${styles.suggestButton}`} onClick={() => handleSendMessage(null, "check if the functions are supported")}>Continue</p>}
+                    {index === 3 && <p className={`text-xs text-gray-700 pl-4 pr-4 pt-2 pb-2 border border-gray-300 rounded-lg cursor-pointer ${styles.suggestButton}`} onClick={() => handleSendMessage(null, "Make it real")}>Make it real</p>}
+                  </div>)}
               </div>
             </div>
           ))}
@@ -168,13 +176,13 @@ const Chat = () => {
           <div ref={messagesEndRef} />
         </div>
       </main>
-      <footer className="p-6">
+      <footer className="p-6 bg-white border-t border-gray-200">
         <form onSubmit={handleSendMessage} className="max-w-3xl mx-auto flex">
           <input
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder="输入你的消息..."
+            placeholder="Talk to your AI builder..."
             className="flex-grow p-2 rounded-l-lg bg-white text-gray-900 border border-gray-300"
             ref={inputRef}
           />
