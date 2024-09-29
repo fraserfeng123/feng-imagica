@@ -1,12 +1,16 @@
 .home {
   height: 100vh;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   background-color: #000;
   color: #fff;
   overflow: hidden;
   position: relative;
+}
+.header {
+  display: flex;
 }
 
 .content {

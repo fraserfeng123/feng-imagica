@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { store } from './redux/store'; // 确保你有这个文件
 import AppRouter from './router';
+import { BrowserRouter as Router } from 'react-router-dom';
 
 function App() {
   const [projects, setProjects] = useState([]);

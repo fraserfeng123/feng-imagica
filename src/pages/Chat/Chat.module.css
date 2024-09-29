@@ -1,0 +1,12 @@
+.roundedRight {
+  border-top-right-radius: 0.5rem; /* 对应 rounded-r-lg */
+  border-bottom-right-radius: 0.5rem; /* 对应 rounded-r-lg */
+  border-top-left-radius: 0rem; /* 对应 rounded-r-lg */
+  border-bottom-left-radius: 0rem; /* 对应 rounded-r-lg */
+  height: 41px;
+  width: 41px !important;
+}
+
+.boxShadow {
+  box-shadow: 0 1px 4px #0000000f, inset 0 0 0 1px #ffffff80, 0 0 0 1px #0000000a;
+}
