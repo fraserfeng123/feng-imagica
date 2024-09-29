@@ -8,5 +8,5 @@
 }
 
 .boxShadow {
-  box-shadow: 0 1px 4px #0000000f, inset 0 0 0 1px #ffffff80, 0 0 0 1px #0000000a;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
 }
