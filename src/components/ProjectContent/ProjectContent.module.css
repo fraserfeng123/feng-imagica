@@ -3,9 +3,10 @@
 }
 
 .projectContent {
+  width: 100%;
+  min-height: calc(100vh - 64px);
   padding: 24px;
   background-color: #f0f2f5;
-  min-height: 100vh;
 }
 
 .content {
@@ -40,12 +41,6 @@
   margin-right: 8px;
 }
 
-.projectContent {
-  width: 100%;
-  padding: 24px;
-  background-color: #f0f2f5;
-  min-height: 100vh;
-}
 
 .header h2 {
   margin: 0;

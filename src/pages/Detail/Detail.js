@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { Layout } from 'antd';
-import { MobileOutlined, GlobalOutlined, WechatOutlined } from '@ant-design/icons';
+import { Layout, Button, Radio } from 'antd';
+import { MobileOutlined, GlobalOutlined, WechatOutlined, DesktopOutlined } from '@ant-design/icons';
 import ProjectInfo from '../../components/ProjectInfo/ProjectInfo';
 import ProjectChat from '../../components/ProjectChat/ProjectChat';
 import CodePreview from '../../components/CodePreview/CodePreview';
@@ -21,6 +21,7 @@ const Detail = () => {
   const [previewCode, setPreviewCode] = useState('');
   const [activeTab, setActiveTab] = useState('preview');
   const [selectedElement, setSelectedElement] = useState(null);
+  const [projectType, setProjectType] = useState('web');
 
   useEffect(() => {
     if (project && project.code) {
@@ -38,8 +39,6 @@ const Detail = () => {
       </Layout>
     );
   }
-
-  const isMobileProject = project.type === 'mobile' || project.type === 'wechat';
 
   const getProjectTypeIcon = (type) => {
     switch(type) {
@@ -63,6 +62,10 @@ const Detail = () => {
     setSelectedElement(elementHTML);
   };
 
+  const handleProjectTypeChange = (e) => {
+    setProjectType(e.target.value);
+  };
+
   return (
     <Layout className={styles.detailLayout}>
       <Content className={styles.content}>
@@ -75,16 +78,25 @@ const Detail = () => {
             Preview
           </button>
           <button
+            
             className={activeTab === 'code' ? styles.activeTab : styles.tab}
             onClick={() => setActiveTab('code')}
           >
             Code edit
           </button>
+          <Radio.Group 
+            value={projectType} 
+            onChange={handleProjectTypeChange}
+            className={styles.projectTypeToggle}
+          >
+            <Radio.Button value="web"><DesktopOutlined /></Radio.Button>
+            <Radio.Button value="mobile"><MobileOutlined /></Radio.Button>
+          </Radio.Group>
         </div>
         <Layout className={styles.innerLayout}>
           <Content className={styles.previewArea}>
             {activeTab === 'preview' ? (
-              isMobileProject ? (
+              projectType === 'mobile' ? (
                 <div className={styles.iphoneModel}>
                   <div className={styles.iphoneScreen}>
                     <CodePreview code={previewCode} onElementSelect={handleElementSelect} />

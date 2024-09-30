@@ -31,9 +31,6 @@ const ProjectInfo = ({ project, getProjectTypeIcon }) => {
         <Col flex="auto">
           <Space direction="horizontal" size={0} align="start" style={{ width: '100%' }}>
             <Title level={4} className={styles.projectTitle}>{project.name}</Title>
-            <Space size="small" style={{ lineHeight: '28px' }}>
-              <Tag icon={getProjectTypeIcon(project.type)} color="blue">{project.type.toUpperCase()}</Tag>
-            </Space>
           </Space>
         </Col>
         <Col>

@@ -54,3 +54,33 @@ export const cancelRequest = () => {
     controller = null;
   }
 };
+
+export const getAppInfo = async (functions, implementation) => {
+  try {
+    const response = await fetch('https://api-dev.braininc.net/be/cot/onboarding/app_info', {
+      method: 'POST',
+      headers: {
+        'Accept': '*/*',
+        'Accept-Language': 'zh-CN,zh;q=0.9',
+        'Authorization': 'token eaa012695ec1565bed0b27d799d8bb8456c6ce75',
+        'Content-Type': 'application/json;charset=UTF-8',
+        'Origin': 'https://dashboard.brainllc.net',
+        'X-Brain-Imagica-Id': '8132510e-9f0c-4881-996b-303b78502d01',
+        'X-Brain-User-Tz': 'Asia/Shanghai'
+      },
+      body: JSON.stringify({
+        functions: functions,
+        implementation: implementation
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('网络响应不正常');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('获取应用信息时出错:', error);
+    throw error;
+  }
+};

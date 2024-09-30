@@ -252,13 +252,13 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, th
               <Button onClick={handleCancel} style={{ marginLeft: 8 }}>Cancel Generation</Button>
             </div>
           )}
-          <Button 
+          {/* <Button 
             type="text" 
             onClick={handleClearChat}
             className={styles.sendButton}
           >
             clear
-          </Button>
+          </Button> */}
         </div>
       }
       <div ref={messagesEndRef} />

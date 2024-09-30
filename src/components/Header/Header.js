@@ -15,12 +15,6 @@ const Header = ({ theme = 'light' }) => {
           className={styles.logo}
         />
       </div>
-      <Search
-        placeholder="搜索项目"
-        onSearch={value => console.log(value)}
-        style={{ width: 200 }}
-        className={styles.search}
-      />
       <Space size="large" className={styles.navIcons}>
         <BellOutlined className={styles.icon} />
         <UserOutlined className={styles.icon} />

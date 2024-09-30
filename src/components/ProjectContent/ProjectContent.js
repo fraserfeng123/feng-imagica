@@ -12,7 +12,7 @@ const ProjectContent = ({ onProjectSelect }) => {
   const navigate = useNavigate();
 
   const handleCreateProject = () => {
-    navigate('/creation-guide');
+    navigate('/chat');
   };
 
   const handleDelete = (e, projectId) => {
@@ -43,10 +43,6 @@ const ProjectContent = ({ onProjectSelect }) => {
             <Card 
               title={
                 <div className={styles.cardTitle}>
-                  <div 
-                    className={styles.colorIndicator} 
-                    style={{ backgroundColor: item.primaryColor }}
-                  />
                   {item.name}
                 </div>
               }
@@ -63,7 +59,6 @@ const ProjectContent = ({ onProjectSelect }) => {
               }
             >
               <p>{item.description}</p>
-              <p>Type: {item.type === 'web' ? 'Web' : 'Mobile App'}</p>
             </Card>
           </List.Item>
         )}

@@ -53,13 +53,7 @@ const projectSlice = createSlice({
       state.isModalVisible = false;
     },
     createProject: (state, action) => {
-      const newProject = {
-        ...action.payload,
-        chatList: [],
-      };
-      state.projects.push(newProject);
-      state.isModalVisible = false;
-      saveProjectsToLocalStorage(state.projects);
+      state.projects.push(action.payload);
     },
     updateProjectCode: (state, action) => {
       const { id, code } = action.payload;
