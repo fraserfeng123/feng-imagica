@@ -2,6 +2,10 @@
   margin-bottom: 12px;
 }
 
+.projectInfo  :global(.ant-card-body) {
+  padding: 10px;
+}
+
 .projectTitle {
   margin-bottom: 4px !important;
   margin-top: 0;

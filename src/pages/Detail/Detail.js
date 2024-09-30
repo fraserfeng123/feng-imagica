@@ -40,15 +40,6 @@ const Detail = () => {
     );
   }
 
-  const getProjectTypeIcon = (type) => {
-    switch(type) {
-      case 'web': return <GlobalOutlined />;
-      case 'wechat': return <WechatOutlined />;
-      case 'mobile': return <MobileOutlined />;
-      default: return null;
-    }
-  };
-
   const handleAcceptCode = (newCode) => {
     setPreviewCode(newCode);
     dispatch(updateProjectCode({ id: project.id, code: newCode }));
@@ -66,10 +57,15 @@ const Detail = () => {
     setProjectType(e.target.value);
   };
 
+  const handleCodeChange = (newCode) => {
+    setPreviewCode(newCode);
+    dispatch(updateProjectCode({ id: project.id, code: newCode }));
+  };
+
   return (
     <Layout className={styles.detailLayout}>
       <Content className={styles.content}>
-        <ProjectInfo project={project} getProjectTypeIcon={getProjectTypeIcon} />
+        <ProjectInfo project={project} />
         <div className={styles.tabContainer}>
           <button
             className={activeTab === 'preview' ? styles.activeTab : styles.tab}
@@ -99,7 +95,11 @@ const Detail = () => {
               projectType === 'mobile' ? (
                 <div className={styles.iphoneModel}>
                   <div className={styles.iphoneScreen}>
-                    <CodePreview code={previewCode} onElementSelect={handleElementSelect} />
+                    <CodePreview 
+                      code={previewCode} 
+                      onElementSelect={handleElementSelect} 
+                      onCodeChange={handleCodeChange}
+                    />
                   </div>
                   <div className={styles.iphoneNotch}></div>
                 </div>
@@ -111,7 +111,11 @@ const Detail = () => {
                     <span className={styles.browserButton}></span>
                   </div>
                   <div className={styles.browserContent}>
-                    <CodePreview code={previewCode} onElementSelect={handleElementSelect} />
+                    <CodePreview 
+                      code={previewCode} 
+                      onElementSelect={handleElementSelect} 
+                      onCodeChange={handleCodeChange}
+                    />
                   </div>
                 </div>
               )
@@ -121,7 +125,6 @@ const Detail = () => {
           </Content>
           <Sider width={500} theme='light' className={styles.chatSider}>
             <ProjectChat 
-              themeColor={project.primaryColor}
               code={previewCode}
               onAcceptCode={handleAcceptCode} 
               initialChatList={project.chatList}

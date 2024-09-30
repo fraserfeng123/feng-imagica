@@ -137,9 +137,6 @@ const Chat = () => {
         id: Date.now(), // 使用时间戳作为临时ID
         name: appInfo.name,
         description: appInfo.description,
-        type: 'web', // 假设默认为web项目,如果需要可以根据实际情况修改
-        primaryColor: '#00ffff', // 设置默认主色
-        secondaryColor: '#ffffff', // 设置默认次色
         code: { language: 'html', code: '' }, // 初始化空代码
         features: appInfo.features,
         audience: appInfo.audience,
@@ -159,7 +156,7 @@ const Chat = () => {
       ]);
 
       // 可以选择导航到新创建的项目详情页面
-      // navigate(`/detail/${newProject.id}`);
+      navigate(`/detail/${newProject.id}`);
 
     } catch (error) {
       console.error('创建项目时出错:', error);

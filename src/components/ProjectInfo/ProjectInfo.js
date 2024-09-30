@@ -6,7 +6,7 @@ import styles from './ProjectInfo.module.css';
 
 const { Title, Text } = Typography;
 
-const ProjectInfo = ({ project, getProjectTypeIcon }) => {
+const ProjectInfo = ({ project }) => {
   const navigate = useNavigate();
 
   const downloadCode = () => {
@@ -30,7 +30,7 @@ const ProjectInfo = ({ project, getProjectTypeIcon }) => {
       <Row gutter={[16, 0]} align="middle">
         <Col flex="auto">
           <Space direction="horizontal" size={0} align="start" style={{ width: '100%' }}>
-            <Title level={4} className={styles.projectTitle}>{project.name}</Title>
+            <Title level={5} className={styles.projectTitle}>{project.name}</Title>
           </Space>
         </Col>
         <Col>
@@ -51,7 +51,7 @@ const ProjectInfo = ({ project, getProjectTypeIcon }) => {
           </Space>
         </Col>
       </Row>
-      <Text type="secondary" className={styles.description}>{project.description}</Text>
+      {/* <Text type="secondary" className={styles.description}>{project.description}</Text> */}
     </Card>
   );
 };

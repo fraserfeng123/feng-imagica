@@ -22,9 +22,6 @@ const projectSlice = createSlice({
     addProject: (state, action) => {
       const newProject = {
         ...action.payload,
-        type: action.payload.type === 'mobile' ? 'mobile' : 'web',
-        primaryColor: action.payload.primaryColor || '#00ffff',
-        secondaryColor: action.payload.secondaryColor || '#ffffff',
       };
       state.projects.push(newProject);
       saveProjectsToLocalStorage(state.projects);
@@ -40,7 +37,6 @@ const projectSlice = createSlice({
           state.projects[index] = {
             ...state.projects[index],
             ...action.payload,
-            type: action.payload.type === 'mobile' ? 'mobile' : 'web',
           };
         }
       }
