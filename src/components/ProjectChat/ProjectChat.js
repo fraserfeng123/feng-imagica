@@ -1,21 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, Input, Button, List, Avatar, Typography, Spin } from 'antd';
 import { SendOutlined, UserOutlined, RobotOutlined, CheckCircleOutlined, LoadingOutlined } from '@ant-design/icons';
-import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
-import js from 'react-syntax-highlighter/dist/esm/languages/hljs/javascript';
-import { atomOneDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import styles from './ProjectChat.module.css';
 import { sendMessage, cancelRequest } from '../../services/chatService';
 import CodePreview from '../CodePreview/CodePreview';
-
-SyntaxHighlighter.registerLanguage('javascript', js);
 
 const { TextArea } = Input;
 const { Text } = Typography;
 
 const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, themeColor, selectedElement, onElementSelect }) => {
   const [messages, setMessages] = useState(initialChatList.length > 0 ? initialChatList : [
-    { id: 1, sender: 'System', content: 'Welcome,What would you like to build today?', time: '10:00' },
+    { id: 1, sender: 'system', content: 'Welcome,What would you like to build today?', time: '10:00' },
   ]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -26,6 +24,8 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, th
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  console.log(messages)
 
   useEffect(() => {
     scrollToBottom();
@@ -39,7 +39,7 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, th
     if (newMessage.trim() && !isLoading) {
       const userMsg = {
         id: messages.length + 1,
-        sender: 'User',
+        sender: 'user',
         content: newMessage,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
@@ -64,7 +64,7 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, th
       }
 
       try {
-        // 在调用 sendMessage 之前清空 selectedElement
+        // 在���用 sendMessage 之前清空 selectedElement
         onElementSelect(null);
         
         const reader = await sendMessage(messages, copyUserMsg);
@@ -103,7 +103,7 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, th
                       systemMessageAdded = true;
                       return [...prevMessages, { 
                         id: prevMessages.length + 1, 
-                        sender: 'System', 
+                        sender: 'system', 
                         content: content, 
                         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
                       }];
@@ -156,41 +156,31 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, th
   };
 
   const renderMessageContent = (content) => {
-    const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
-    const parts = [];
-    let lastIndex = 0;
-    let match;
-
-    while ((match = codeBlockRegex.exec(content)) !== null) {
-      if (match.index > lastIndex) {
-        parts.push(content.slice(lastIndex, match.index));
-      }
-      const language = match[1] || 'html';
-      const code = match[2].trim();
-      parts.push(
-        <div className={styles.codeBlockWrapper} key={match.index}>
-          <div className={styles.codeBlockHeader}>
-            <span>{language}</span>
-          </div>
-          {language === 'html' ? (
-            <iframe
-              srcDoc={`<html><body>${code}</body></html>`}
-              title="HTML Preview"
-              className={styles.codePreviewIframe}
-            />
-          ) : (
-            <pre className={styles.codeBlock}>{code}</pre>
-          )}
-        </div>
-      );
-      lastIndex = match.index + match[0].length;
-    }
-
-    if (lastIndex < content.length) {
-      parts.push(content.slice(lastIndex));
-    }
-
-    return parts;
+    return (
+      <ReactMarkdown
+        components={{
+          code({node, inline, className, children, ...props}) {
+            const match = /language-(\w+)/.exec(className || '')
+            return !inline && match ? (
+              <SyntaxHighlighter
+                style={atomDark}
+                language={match[1]}
+                PreTag="div"
+                {...props}
+              >
+                {String(children).replace(/\n$/, '')}
+              </SyntaxHighlighter>
+            ) : (
+              <code className={className} {...props}>
+                {children}
+              </code>
+            )
+          }
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    );
   };
 
   const handleKeyPress = (e) => {
@@ -217,15 +207,14 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, th
         itemLayout="horizontal"
         dataSource={messages}
         renderItem={item => (
-          <List.Item className={`${styles.messageItem} ${item.sender === 'User' ? styles.userMessage : styles.systemMessage}`}>
+          <List.Item className={`${styles.messageItem} ${item.sender === 'user' ? styles.userMessage : styles.systemMessage}`}>
             <div className={styles.messageWrapper}>
-              {item.sender === 'System' && (
-                <Avatar icon={<RobotOutlined />} className={styles.avatar} />
+              {item.sender === 'system' && (
+                <video src="https://dopniceu5am9m.cloudfront.net/static/230614_ai_listen/ASSET_AI_1_loop.mp4" className={styles.avatar} />
               )}
               <div className={styles.messageContent}>
                 {renderMessageContent(item.content)}
-                <Text type="secondary" className={styles.messageTime}>{item.time}</Text>
-                {item.sender === 'System' && item.content.includes('```') && (
+                {item.sender === 'system' && item.content.includes('```') && (
                   <Button
                     type="primary"
                     icon={<CheckCircleOutlined />}
@@ -236,7 +225,7 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, th
                   </Button>
                 )}
               </div>
-              {item.sender === 'User' && (
+              {item.sender === 'user' && (
                 <Avatar icon={<UserOutlined />} className={styles.avatar} />
               )}
             </div>

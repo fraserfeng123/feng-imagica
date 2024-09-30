@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Button, Spin } from 'antd';
+import { Button, message, Spin } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -78,13 +78,13 @@ const Chat = () => {
             if (data === '[DONE]') {
               setMessages(prevMessages => {
                 const newMessages = [...prevMessages];
-                if (newMessages[newMessages.length - 1].sender === 'System') {
+                if (newMessages[newMessages.length - 1].sender === 'system') {
                   newMessages[newMessages.length - 1].content = content;
                 } else {
                   setFunctions(JSON.parse(content).functions);
                   setImplementation(JSON.parse(content).implementation);
                   newMessages.push({ 
-                    sender: 'System', 
+                    sender: 'system', 
                     content: JSON.parse(content).response, 
                     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
                   });
@@ -115,7 +115,7 @@ const Chat = () => {
       await processChunk();
     } catch (error) {
       console.error('发送消息时出错:', error);
-      setMessages(prevMessages => [...prevMessages, { sender: 'System', content: '抱歉,发生了错误。请稍后再试。' }]);
+      setMessages(prevMessages => [...prevMessages, { sender: 'system', content: '抱歉,发生了错误。请稍后再试。' }]);
     } finally {
       setIsTyping(false);
     }
@@ -129,46 +129,67 @@ const Chat = () => {
   const handleMakeItReal = async () => {
     setIsLoading(true);
     try {
-      const appInfo = await getAppInfo(functions, implementation);
-      console.log('App Info:', appInfo);
-      
-      // 创建新项目
-      const newProject = {
-        id: Date.now(), // 使用时间戳作为临时ID
-        name: appInfo.name,
-        description: appInfo.description,
-        code: { language: 'html', code: '' }, // 初始化空代码
-        features: appInfo.features,
-        audience: appInfo.audience,
-        goal: appInfo.goal
-      };
+      setMessages(prevMessages => {
+        const updatedMessages = [
+          ...prevMessages, 
+          { 
+            sender: 'user', 
+            content: `Make it real`,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }
+        ];
+        
+        // 在这里执行后续操作，确保使用最新的消息列表
+        (async () => {
+          try {
+            const appInfo = await getAppInfo(functions, implementation);
+            console.log('App Info:', appInfo);
+            
+            // 创建新项目
+            const newProject = {
+              id: Date.now(), // 使用时间戳作为临时ID
+              name: appInfo.name,
+              description: appInfo.description,
+              code: { language: 'html', code: '' }, // 初始化空代码
+              features: appInfo.features,
+              audience: appInfo.audience,
+              goal: appInfo.goal,
+              chatList: updatedMessages, // 使用更新后的消息列表
+            };
 
-      dispatch(createProject(newProject));
+            dispatch(createProject(newProject));
 
-      // 添加一条系统消息,通知用户项目已创建
-      setMessages(prevMessages => [
-        ...prevMessages, 
-        { 
-          sender: 'System', 
-          content: `项目 "${appInfo.name}" 已成功创建!您可以在项目列表中查看它。`,
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }
-      ]);
+            // 添加一条系统消息，通知用户项目已创建
+            setMessages(prevMsgs => [
+              ...prevMsgs, 
+              { 
+                sender: 'system', 
+                content: `项目 "${appInfo.name}" 已成功创建！您可以在项目列表中查看它。`,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+              }
+            ]);
 
-      // 可以选择导航到新创建的项目详情页面
-      navigate(`/detail/${newProject.id}`);
+            // 导航到新创建的项目详情页面
+            navigate(`/detail/${newProject.id}`);
+          } catch (error) {
+            console.error('创建项目时出错:', error);
+            setMessages(prevMsgs => [
+              ...prevMsgs, 
+              { 
+                sender: 'system', 
+                content: '抱歉，创建项目时发生错误。请稍后再试。',
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+              }
+            ]);
+          } finally {
+            setIsLoading(false);
+          }
+        })();
 
+        return updatedMessages;
+      });
     } catch (error) {
-      console.error('创建项目时出错:', error);
-      setMessages(prevMessages => [
-        ...prevMessages, 
-        { 
-          sender: 'System', 
-          content: '抱歉,创建项目时发生错误。请稍后再试。',
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }
-      ]);
-    } finally {
+      console.error('处理 Make it real 请求时出错:', error);
       setIsLoading(false);
     }
   };

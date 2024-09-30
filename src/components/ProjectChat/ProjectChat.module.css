@@ -37,7 +37,12 @@
 
 .avatar {
   flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 15px;
   margin: 0 8px;
+  color:#40a9ff;
+  background-color: #fff;
 }
 
 .messageContent {
