@@ -1,13 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Button, message, Spin } from 'antd';
+import { Button as AButton, message, Spin } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import styles from './Chat.module.css';
 import { sendMessage, cancelRequest, getAppInfo } from '../../services/chatService';
 import { useDispatch } from 'react-redux';
-import { createProject } from '../../redux/projectSlice'; // 确保导入了createProject action
+import { createProject } from '../../redux/projectSlice';
+import Title from "../../components/Nodes/Title/Title";
+import SubTitle from "../../components/Nodes/SubTitle/SubTitle";
+import Input from "../../components/Nodes/Input/Input";
+import Button from "../../components/Nodes/Button/Button";
+import ReactDOMServer from 'react-dom/server';
 
 const Chat = () => {
   const [messages, setMessages] = useState([]);
@@ -139,22 +144,32 @@ const Chat = () => {
           }
         ];
         
-        // 在这里执行后续操作，确保使用最新的消息列表
         (async () => {
           try {
             const appInfo = await getAppInfo(functions, implementation);
             console.log('App Info:', appInfo);
             
+            // 拼接所有 Nodes 组件的 HTML
+            const nodesHtml = `
+              <div class="bg-blue-50 flex-1 p-4 pt-12">
+              ${ReactDOMServer.renderToString(<Title text="Travel Itinerary Generator"/>)}
+              ${ReactDOMServer.renderToString(<SubTitle text="A travel planner that generates an image of the destination and a day-by-day itinerary based on the destination and length of stay input by users." />)}
+              ${ReactDOMServer.renderToString(<Input title="Travel Destination" placeholder="Enter the travel destination" />)}
+              ${ReactDOMServer.renderToString(<Input title="Duration of Stay" placeholder="Enter the duration of your stay" />)}
+              ${ReactDOMServer.renderToString(<Button />)}
+              </div>
+            `;
+
             // 创建新项目
             const newProject = {
-              id: Date.now(), // 使用时间戳作为临时ID
+              id: Date.now(),
               name: appInfo.name,
               description: appInfo.description,
-              code: { language: 'html', code: '' }, // 初始化空代码
+              code: { language: 'html', code: nodesHtml }, // 使用拼接的 HTML
               features: appInfo.features,
               audience: appInfo.audience,
               goal: appInfo.goal,
-              chatList: updatedMessages, // 使用更新后的消息列表
+              chatList: updatedMessages,
             };
 
             dispatch(createProject(newProject));
@@ -254,7 +269,7 @@ const Chat = () => {
                 <div className="inline-block p-3 rounded-lg">
                   AI is thinking...
                 </div>
-                <Button onClick={handleCancel}>cancel</Button>
+                <AButton onClick={handleCancel}>cancel</AButton>
               </div>
             )}
             <div ref={messagesEndRef} />
@@ -270,7 +285,7 @@ const Chat = () => {
               className="flex-grow p-2 rounded-l-lg bg-white text-gray-900 border border-gray-300"
               ref={inputRef}
             />
-            <Button
+            <AButton
               type="primary"
               htmlType="submit"
               icon={<SendOutlined />}
