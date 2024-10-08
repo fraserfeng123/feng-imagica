@@ -6,12 +6,26 @@ import styles from './ProjectInfo.module.css';
 
 const { Title, Text } = Typography;
 
+function geHhtmlTemplate(code) {
+  return `<!doctype html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body>
+      ${code}
+    </body>
+    </html>`
+}
+
 const ProjectInfo = ({ project }) => {
   const navigate = useNavigate();
 
   const downloadCode = () => {
     if (project.code) {
-      const blob = new Blob([project.code.code], { type: 'text/html' });
+      const blob = new Blob([geHhtmlTemplate(project.code.code)], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
