@@ -1,10 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Typography, Tag, Space, Button, Row, Col, Avatar } from 'antd';
-import { ArrowLeftOutlined, DownloadOutlined, CalendarOutlined } from '@ant-design/icons';
+import { Card, Typography, Space, Button, Row, Col } from 'antd';
+import { ArrowLeftOutlined, DownloadOutlined } from '@ant-design/icons';
 import styles from './ProjectInfo.module.css';
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 function geHhtmlTemplate(code) {
   return `<!doctype html>
@@ -49,11 +49,6 @@ const ProjectInfo = ({ project }) => {
         </Col>
         <Col>
           <Space>
-            <Avatar.Group maxCount={3}>
-              {[...Array(project.members)].map((_, index) => (
-                <Avatar key={index} style={{ backgroundColor: '#f56a00' }}>U</Avatar>
-              ))}
-            </Avatar.Group>
             <Button 
               type="primary" 
               icon={<DownloadOutlined />} 

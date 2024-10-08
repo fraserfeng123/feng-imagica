@@ -1,12 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Card, Input, Button, List, Avatar, Typography, Spin } from 'antd';
-import { SendOutlined, UserOutlined, RobotOutlined, CheckCircleOutlined, LoadingOutlined } from '@ant-design/icons';
 import ReactMarkdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { Card, Input, Button, List, Avatar, Typography, Spin } from 'antd';
+import { SendOutlined, UserOutlined, CheckCircleOutlined, LoadingOutlined } from '@ant-design/icons';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import styles from './ProjectChat.module.css';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { sendMessage, cancelRequest } from '../../services/chatService';
-import CodePreview from '../CodePreview/CodePreview';
+import styles from './ProjectChat.module.css';
 
 const { TextArea } = Input;
 const { Text } = Typography;
@@ -24,8 +23,6 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, th
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
-
-  console.log(messages)
 
   useEffect(() => {
     scrollToBottom();
@@ -57,7 +54,6 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, th
         copyUserMsg.content = "基于已有的html代码```" + code.code + "```实现，并返回我完整的html代码，网页要求美观和现代化，网页主题色使用"+ themeColor +"：" + userMsg.content;
       }
 
-      console.log(selectedElement)
       // 如果有选中的元素，将其添加到消息中
       if (selectedElement) {
         copyUserMsg.content += "\n\n上面描述的修改只针对以下是我选中的元素，其他的代码不要变：\n```html\n" + selectedElement + "\n```";
@@ -195,10 +191,6 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, th
     setIsLoading(false);
     setIsTyping(false);
   };
-
-  const handleClearChat = () => {
-    setMessages(messages.slice(0, 1));
-  }
 
   return (
     <Card title="Chat" className={styles.chatBox} bodyStyle={{ padding: 0, height: '100%' }}>

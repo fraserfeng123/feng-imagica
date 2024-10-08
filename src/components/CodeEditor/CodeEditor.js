@@ -50,7 +50,7 @@ const CodeEditor = ({ code, onSave }) => {
     <div className={styles.editorContainer}>
       <Editor
         width="100%"
-        height="90%"
+        height="94%"
         language="html"
         theme="vs-dark"
         value={editorCode}

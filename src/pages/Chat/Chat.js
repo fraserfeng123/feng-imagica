@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Button as AButton, message, Spin } from 'antd';
+import { Button as AButton, Spin } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import styles from './Chat.module.css';
 import { sendMessage, cancelRequest, getAppInfo } from '../../services/chatService';
 import { useDispatch } from 'react-redux';
 import { createProject } from '../../redux/projectSlice';
-import Title from "../../components/Nodes/Title/Title";
 import SubTitle from "../../components/Nodes/SubTitle/SubTitle";
 import Input from "../../components/Nodes/Input/Input";
 import Button from "../../components/Nodes/Button/Button";
+import ReactMarkdown from 'react-markdown';
+import Title from "../../components/Nodes/Title/Title";
 import ReactDOMServer from 'react-dom/server';
+import remarkGfm from 'remark-gfm';
+import styles from './Chat.module.css';
 
 const Chat = () => {
   const [messages, setMessages] = useState([]);
@@ -100,7 +100,6 @@ const Chat = () => {
             }
             try {
               const jsonData = JSON.parse(data);
-              console.log("jsonData", jsonData)
               if (jsonData.choices && jsonData.choices[0].delta.content) {
                 content += jsonData.choices[0].delta.content;
               }
@@ -108,8 +107,6 @@ const Chat = () => {
               console.error('解析JSON时出错:', error, 'Raw data:', data);
               // 继续处理下一行，不中断整个过程
             }
-          } else {
-            console.log("-----", line)
           }
         }
 
