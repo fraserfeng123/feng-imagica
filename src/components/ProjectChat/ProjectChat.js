@@ -4,7 +4,7 @@ import { Card, Input, Button, List, Avatar, Typography, Spin } from 'antd';
 import { SendOutlined, UserOutlined, CheckCircleOutlined, LoadingOutlined } from '@ant-design/icons';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { sendMessage, cancelRequest } from '../../services/chatService';
+import { chatToAI, cancelRequest } from '../../services/chatService';
 import styles from './ProjectChat.module.css';
 
 const { TextArea } = Input;
@@ -63,7 +63,7 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, th
         // 在���用 sendMessage 之前清空 selectedElement
         onElementSelect(null);
         
-        const reader = await sendMessage(messages, copyUserMsg);
+        const reader = await chatToAI(messages, copyUserMsg);
         let content = '';
         let systemMessageAdded = false;
         let buffer = '';
