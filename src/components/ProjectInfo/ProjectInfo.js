@@ -1,31 +1,54 @@
 import React from 'react';
+import ReactDOMServer from 'react-dom/server';
 import { useNavigate } from 'react-router-dom';
-import { Card, Typography, Space, Button, Row, Col } from 'antd';
+import { Card, Space, Button, Row, Col } from 'antd';
 import { ArrowLeftOutlined, DownloadOutlined } from '@ant-design/icons';
+import Title from "../Nodes/Title/Title";
+import SubTitle from "../Nodes/SubTitle/SubTitle";
 import styles from './ProjectInfo.module.css';
+import Input from '../Nodes/Input/Input';
 
-const { Title } = Typography;
+function getHtmlTemplate(nodes, title, description) {
+  const nodeToHtml = (node) => {
+    if (node.type === 'userinput') {
+      return ReactDOMServer.renderToString(
+        <Input title={node.data.name} placeholder={node.data.description} />
+      );
+    }
+    return '';
+  };
 
-function geHhtmlTemplate(code) {
+  const bodyContent = nodes.map(nodeToHtml).join('\n');
+
   return `<!doctype html>
     <html>
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <script src="https://cdn.tailwindcss.com"></script>
+      <title>${title}</title>
     </head>
-    <body>
-      ${code}
+    <body class="p-4">
+    <div class=flex-1 p-4 pt-12">
+      ${ReactDOMServer.renderToString(
+        <Title text={title} />
+      )}
+      ${ReactDOMServer.renderToString(
+        <SubTitle text={description} />
+      )}
+      ${bodyContent}
+      </div>
     </body>
-    </html>`
+    </html>`;
 }
 
 const ProjectInfo = ({ project }) => {
   const navigate = useNavigate();
 
   const downloadCode = () => {
-    if (project.code) {
-      const blob = new Blob([geHhtmlTemplate(project.code.code)], { type: 'text/html' });
+    if (project.nodes) {
+      const htmlContent = getHtmlTemplate(project.nodes, project.name, project.description);
+      const blob = new Blob([htmlContent], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -35,7 +58,7 @@ const ProjectInfo = ({ project }) => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } else {
-      alert('No code available to download');
+      alert('No nodes available to download');
     }
   };
 
@@ -60,7 +83,6 @@ const ProjectInfo = ({ project }) => {
           </Space>
         </Col>
       </Row>
-      {/* <Text type="secondary" className={styles.description}>{project.description}</Text> */}
     </Card>
   );
 };

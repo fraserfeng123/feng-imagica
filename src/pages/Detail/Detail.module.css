@@ -125,6 +125,7 @@
 
 .tabContainer {
   display: flex;
+  justify-content: flex-start;
   margin-bottom: 12px;
 }
 
@@ -178,7 +179,7 @@
 }
 
 .projectTypeToggle {
-  margin-left: auto;
+  /* margin-left: auto; */
   display: flex;
 }
 

@@ -4,7 +4,7 @@ import { Card, Input, Button, List, Avatar, Typography, Spin } from 'antd';
 import { SendOutlined, UserOutlined, CheckCircleOutlined, LoadingOutlined } from '@ant-design/icons';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { chatToAI, cancelRequest } from '../../services/chatService';
+import { chatToAI, cancelRequest, sendAiMessageV2 } from '../../services/chatService';
 import styles from './ProjectChat.module.css';
 
 const { TextArea } = Input;
@@ -51,7 +51,7 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, th
       } else if (rollBack) {
         copyUserMsg.content = "我修改了一些代码，修改后的代码是```" + code.code + "```，请使用我修改后的代码实现并返回我完整的html代码:" + userMsg.content + ",要求新增的代码样式美观和现代化，网页主题色是" + themeColor;
       } else {
-        copyUserMsg.content = "基于已有的html代码```" + code.code + "```实现，并返回我完整的html代码，网页要求美观和现代化，网页主题色使用"+ themeColor +"：" + userMsg.content;
+        copyUserMsg.content = "基于已有的html代码```" + code.code + "```实现，并返回我完整的html代码，网页要求美观和现代化，"+ themeColor +"：" + userMsg.content;
       }
 
       // 如果有选中的元素，将其添加到消息中

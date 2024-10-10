@@ -130,3 +130,35 @@ export const chatToAI = async (messages, newMessage) => {
     controller = null;
   }
 }
+
+export const buildApp = async (userMessage, implementation, functions, graphstring = "") => {
+  try {
+    const response = await fetch('https://api-dev.braininc.net/be/cot/onboarding/build', {
+      method: 'POST',
+      headers: {
+        'Accept': '*/*',
+        'Accept-Language': 'zh-CN,zh;q=0.9',
+        'Authorization': 'token eaa012695ec1565bed0b27d799d8bb8456c6ce75',
+        'Content-Type': 'application/json;charset=UTF-8',
+        'Origin': 'https://dashboard.brainllc.net',
+        'X-Brain-Imagica-Id': 'f3c04d24-2fcb-44b9-9694-d3a8365e0e81',
+        'X-Brain-User-Tz': 'Asia/Shanghai'
+      },
+      body: JSON.stringify({
+        user_message: userMessage,
+        implementation: implementation,
+        functions: functions,
+        graphstring: graphstring
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('网络响应不正常');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('构建应用时出错:', error);
+    throw error;
+  }
+};

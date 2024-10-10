@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button as AButton, Spin } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
-import { sendMessage, cancelRequest, getAppInfo } from '../../services/chatService';
+import { sendMessage, cancelRequest, getAppInfo, buildApp } from '../../services/chatService';
 import { useDispatch } from 'react-redux';
 import { createProject } from '../../redux/projectSlice';
 import SubTitle from "../../components/Nodes/SubTitle/SubTitle";
@@ -116,7 +116,7 @@ const Chat = () => {
 
       await processChunk();
     } catch (error) {
-      console.error('发送消息时出错:', error);
+      console.error('发消息时出错:', error);
       setMessages(prevMessages => [...prevMessages, { sender: 'system', content: '抱歉,发生了错误。请稍后再试。' }]);
     } finally {
       setIsTyping(false);
@@ -131,77 +131,58 @@ const Chat = () => {
   const handleMakeItReal = async () => {
     setIsLoading(true);
     try {
-      setMessages(prevMessages => {
-        const updatedMessages = [
-          ...prevMessages, 
-          { 
-            sender: 'user', 
-            content: `Make it real`,
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          }
-        ];
-        
-        (async () => {
-          try {
-            const appInfo = await getAppInfo(functions, implementation);
-            console.log('App Info:', appInfo);
-            
-            // 拼接所有 Nodes 组件的 HTML
-            const nodesHtml = `
-              <div class="bg-blue-50 flex-1 p-4 pt-12">
-              ${ReactDOMServer.renderToString(<Title text="Travel Itinerary Generator"/>)}
-              ${ReactDOMServer.renderToString(<SubTitle text="A travel planner that generates an image of the destination and a day-by-day itinerary based on the destination and length of stay input by users." />)}
-              ${ReactDOMServer.renderToString(<Input title="Travel Destination" placeholder="Enter the travel destination" />)}
-              ${ReactDOMServer.renderToString(<Input title="Duration of Stay" placeholder="Enter the duration of your stay" />)}
-              ${ReactDOMServer.renderToString(<Button />)}
-              </div>
-            `;
+      const updatedMessages = [
+        ...messages, 
+        { 
+          sender: 'user', 
+          content: `Make it real`,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+      ];
+      setMessages(updatedMessages);
 
-            // 创建新项目
-            const newProject = {
-              id: Date.now(),
-              name: appInfo.name,
-              description: appInfo.description,
-              code: { language: 'html', code: nodesHtml }, // 使用拼接的 HTML
-              features: appInfo.features,
-              audience: appInfo.audience,
-              goal: appInfo.goal,
-              chatList: updatedMessages,
-            };
+      const appInfo = await getAppInfo(functions, implementation);
+      console.log('App Info:', appInfo);
+      
+      const buildResult = await buildApp("check if the functions are supported", implementation, functions);
+      console.log('Build Result:', buildResult);
 
-            dispatch(createProject(newProject));
+      // 创建新项目
+      const newProject = {
+        id: Date.now(),
+        name: appInfo.name,
+        description: appInfo.description,
+        nodes: buildResult.graph.nodes,
+        features: appInfo.features,
+        audience: appInfo.audience,
+        goal: appInfo.goal,
+        chatList: updatedMessages,
+        buildResult: buildResult,
+      };
 
-            // 添加一条系统消息，通知用户项目已创建
-            setMessages(prevMsgs => [
-              ...prevMsgs, 
-              { 
-                sender: 'system', 
-                content: `项目 "${appInfo.name}" 已成功创建！您可以在项目列表中查看它。`,
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-              }
-            ]);
+      dispatch(createProject(newProject));
 
-            // 导航到新创建的项目详情页面
-            navigate(`/detail/${newProject.id}`);
-          } catch (error) {
-            console.error('创建项目时出错:', error);
-            setMessages(prevMsgs => [
-              ...prevMsgs, 
-              { 
-                sender: 'system', 
-                content: '抱歉，创建项目时发生错误。请稍后再试。',
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-              }
-            ]);
-          } finally {
-            setIsLoading(false);
-          }
-        })();
+      setMessages(prevMsgs => [
+        ...prevMsgs, 
+        { 
+          sender: 'system', 
+          content: `项目 "${appInfo.name}" 已成功创建！您可以在项目列表中查看它。`,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+      ]);
 
-        return updatedMessages;
-      });
+      navigate(`/detail/${newProject.id}`);
     } catch (error) {
-      console.error('处理 Make it real 请求时出错:', error);
+      console.error('创建项目时出错:', error);
+      setMessages(prevMsgs => [
+        ...prevMsgs, 
+        { 
+          sender: 'system', 
+          content: '抱歉,创建项目时发生错误。请稍后再试。',
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+      ]);
+    } finally {
       setIsLoading(false);
     }
   };

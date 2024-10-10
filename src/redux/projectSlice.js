@@ -51,11 +51,11 @@ const projectSlice = createSlice({
     createProject: (state, action) => {
       state.projects.push(action.payload);
     },
-    updateProjectCode: (state, action) => {
-      const { id, code } = action.payload;
+    updateProjectNodes: (state, action) => {
+      const { id, nodes } = action.payload;
       const project = state.projects.find(p => p.id === id);
       if (project) {
-        project.code = code;
+        project.nodes = nodes;
         saveProjectsToLocalStorage(state.projects);
       }
     },
@@ -64,6 +64,16 @@ const projectSlice = createSlice({
       const project = state.projects.find(p => p.id === id);
       if (project) {
         project.chatList = chatList;
+        saveProjectsToLocalStorage(state.projects);
+      }
+    },
+    updateProjectCode: (state, action) => {
+      const { id, nodes, title, description } = action.payload;
+      const project = state.projects.find(p => p.id === id);
+      if (project) {
+        project.nodes = nodes;
+        if (title !== undefined) project.name = title;
+        if (description !== undefined) project.description = description;
         saveProjectsToLocalStorage(state.projects);
       }
     },

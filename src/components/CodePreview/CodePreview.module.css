@@ -5,6 +5,10 @@
   background-color: white;
 }
 
+.previewBox {
+  padding-top: 40px;
+}
+
 .previewContent {
   min-height: 100%;
   outline: none;
@@ -22,4 +26,88 @@
 .previewContent .selected {
   outline: 2px solid #00ff00;
   outline-offset: 2px;
+  position: relative; /* 确保按钮容器定位正确 */
+}
+
+.buttonContainer {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 5px;
+}
+
+.editButton, .linkButton, .deleteButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.elementWrapper {
+  position: relative;
+  margin-bottom: 10px;
+  padding: 5px;
+  border: 2px solid transparent;
+  transition: border-color 0.3s ease;
+}
+
+.selectedElement {
+  border-color: #1890ff; /* 蓝色边框 */
+}
+
+.talkToAIButton {
+  position: absolute;
+  top: -30px; /* 调整这个值来改变按钮与元素的距离 */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #1890ff;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  z-index: 10;
+}
+
+.actionButtons {
+  position: absolute;
+  top: -30px; /* 调整这个值来改变按钮与元素的距离 */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #1890ff;
+  color: white;
+  padding: 5px 15px; /* 增加一些内边距 */
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  z-index: 10;
+  display: flex;
+  gap: 10px;
+  width: auto; /* 或者一个更大的固定宽度 */
+}
+
+.actionButton {
+  cursor: pointer;
+  transition: color 0.3s ease;
+  margin: 0 2px; /* 在按钮之间添加一些间距 */
+}
+
+.actionButton:hover {
+  color: #e6f7ff;
+}
+
+.editInput {
+  width: 100%;
+  padding: 5px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.editInput:focus {
+  outline: none;
+  border-color: #40a9ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
 }
