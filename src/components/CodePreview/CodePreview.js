@@ -6,12 +6,15 @@ import SubTitle from "../Nodes/SubTitle/SubTitle";
 import { EditOutlined, DeleteOutlined, MessageOutlined, ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 
-const CodePreview = ({ nodes = [], title = "", description = "", onNodesChange }) => {
+const CodePreview = ({ nodes = [], title = "", description = "", onNodesChange, onTalkToAI }) => {
   const [selected, setSelected] = useState(null);
   const [editing, setEditing] = useState(null);
   const [editValue, setEditValue] = useState("");
   const previewRef = useRef(null);
   const editInputRef = useRef(null);
+
+  const nodesArray = Array.isArray(nodes) ? nodes : [];
+  const userInputs = nodesArray.filter((node) => node.type === "userinput");
 
   const handleSelect = (index, event) => {
     event.stopPropagation();
@@ -90,6 +93,7 @@ const CodePreview = ({ nodes = [], title = "", description = "", onNodesChange }
       [newNodes[index - 1], newNodes[index]] = [newNodes[index], newNodes[index - 1]];
       onNodesChange(newNodes, title, description);
       setSelected(index - 1);
+      setSelected(null);
     }
   };
 
@@ -100,11 +104,23 @@ const CodePreview = ({ nodes = [], title = "", description = "", onNodesChange }
       [newNodes[index], newNodes[index + 1]] = [newNodes[index + 1], newNodes[index]];
       onNodesChange(newNodes, title, description);
       setSelected(index + 1);
+      setSelected(null);
     }
   };
 
-  const nodesArray = Array.isArray(nodes) ? nodes : [];
-  const userInputs = nodesArray.filter((node) => node.type === "userinput");
+  const handleTalkToAI = (index, event) => {
+    event.stopPropagation();
+    let content;
+    if (index === 'title') {
+      content = title;
+    } else if (index === 'description') {
+      content = description;
+    } else {
+      content = nodes[index].data.name;
+    }
+    onTalkToAI(content);
+    setSelected(null);
+  };
 
   const renderElement = (key, content, index) => (
     <div
@@ -116,9 +132,9 @@ const CodePreview = ({ nodes = [], title = "", description = "", onNodesChange }
     >
       {selected === index && (
         <div className={styles.actionButtons}>
-          <Tooltip title="Talk to AI">
-            <MessageOutlined className={styles.actionButton} />
-          </Tooltip>
+          {typeof index === 'number' && (<Tooltip title="Talk to AI">
+            <MessageOutlined className={styles.actionButton} onClick={(e) => handleTalkToAI(index, e)} />
+          </Tooltip>)}
           <Tooltip title="Edit">
             <EditOutlined className={styles.actionButton} onClick={(e) => handleEdit(index, e)} />
           </Tooltip>

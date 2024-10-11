@@ -30,6 +30,11 @@ const Detail = () => {
   const [selectedElement, setSelectedElement] = useState(null);
   const [projectType, setProjectType] = useState("web");
 
+  const [chatInputValue, setChatInputValue] = useState('');
+  const handleTalkToAI = (content) => {
+    setChatInputValue(content);
+  };
+
   useEffect(() => {
     if (project && project.nodes) {
       setPreviewNodes(project.nodes);
@@ -115,6 +120,7 @@ const Detail = () => {
                     title={project.name}
                     description={project.description}
                     onNodesChange={handleNodesChange}
+                    onTalkToAI={handleTalkToAI}
                   />
                 </div>
                 <div className={styles.iphoneNotch}></div>
@@ -132,6 +138,7 @@ const Detail = () => {
                     title={project.name}
                     description={project.description}
                     onNodesChange={handleNodesChange}
+                    onTalkToAI={handleTalkToAI}
                   />
                 </div>
               </div>
@@ -145,6 +152,8 @@ const Detail = () => {
               onUpdateChatList={handleUpdateChatList}
               selectedElement={selectedElement}
               onElementSelect={handleElementSelect}
+              chatInputValue={chatInputValue}
+              setChatInputValue={setChatInputValue}
             />
           </Sider>
         </Layout>

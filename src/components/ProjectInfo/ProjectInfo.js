@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 import { useNavigate } from 'react-router-dom';
-import { Card, Space, Button, Row, Col } from 'antd';
+import { Card, Space, Typography, Button, Row, Col } from 'antd';
 import { ArrowLeftOutlined, DownloadOutlined } from '@ant-design/icons';
 import Title from "../Nodes/Title/Title";
 import SubTitle from "../Nodes/SubTitle/SubTitle";
@@ -67,7 +67,7 @@ const ProjectInfo = ({ project }) => {
       <Row gutter={[16, 0]} align="middle">
         <Col flex="auto">
           <Space direction="horizontal" size={0} align="start" style={{ width: '100%' }}>
-            <Title level={5} className={styles.projectTitle}>{project.name}</Title>
+            <Typography.Title level={5} className={styles.projectTitle}>{project.name}</Typography.Title>
           </Space>
         </Col>
         <Col>

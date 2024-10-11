@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Card, Input, Button, List, Avatar, Typography, Spin } from 'antd';
-import { SendOutlined, UserOutlined, CheckCircleOutlined, LoadingOutlined } from '@ant-design/icons';
+import { Card, Input, Button, List, Avatar, Typography, Spin, Tag } from 'antd';
+import { SendOutlined, UserOutlined, CheckCircleOutlined, LoadingOutlined, CloseOutlined } from '@ant-design/icons';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { chatToAI, cancelRequest, sendAiMessageV2 } from '../../services/chatService';
@@ -10,7 +10,7 @@ import styles from './ProjectChat.module.css';
 const { TextArea } = Input;
 const { Text } = Typography;
 
-const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, themeColor, selectedElement, onElementSelect }) => {
+const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, themeColor, selectedElement, onElementSelect, chatInputValue, setChatInputValue }) => {
   const [messages, setMessages] = useState(initialChatList.length > 0 ? initialChatList : [
     { id: 1, sender: 'system', content: 'Welcome,What would you like to build today?', time: '10:00' },
   ]);
@@ -60,7 +60,7 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, th
       }
 
       try {
-        // 在���用 sendMessage 之前清空 selectedElement
+        // 在用 sendMessage 之前清空 selectedElement
         onElementSelect(null);
         
         const reader = await chatToAI(messages, copyUserMsg);
@@ -154,25 +154,25 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, th
   const renderMessageContent = (content) => {
     return (
       <ReactMarkdown
-        components={{
-          code({node, inline, className, children, ...props}) {
-            const match = /language-(\w+)/.exec(className || '')
-            return !inline && match ? (
-              <SyntaxHighlighter
-                style={atomDark}
-                language={match[1]}
-                PreTag="div"
-                {...props}
-              >
-                {String(children).replace(/\n$/, '')}
-              </SyntaxHighlighter>
-            ) : (
-              <code className={className} {...props}>
-                {children}
-              </code>
-            )
-          }
-        }}
+        // components={{
+        //   code({node, inline, className, children, ...props}) {
+        //     const match = /language-(\w+)/.exec(className || '')
+        //     return !inline && match ? (
+        //       <SyntaxHighlighter
+        //         style={atomDark}
+        //         language={match[1]}
+        //         PreTag="div"
+        //         {...props}
+        //       >
+        //         {String(children).replace(/\n$/, '')}
+        //       </SyntaxHighlighter>
+        //     ) : (
+        //       <code className={className} {...props}>
+        //         {children}
+        //       </code>
+        //     )
+        //   }
+        // }}
       >
         {content}
       </ReactMarkdown>
@@ -192,6 +192,10 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, th
     setIsTyping(false);
   };
 
+  const handleClearChatInputValue = () => {
+    setChatInputValue('');
+  };
+
   return (
     <Card title="Chat" className={styles.chatBox} bodyStyle={{ padding: 0, height: '100%' }}>
       <List
@@ -206,7 +210,7 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, th
               )}
               <div className={styles.messageContent}>
                 {renderMessageContent(item.content)}
-                {item.sender === 'system' && item.content.includes('```') && (
+                {/* {item.sender === 'system' && item.content.includes('```') && (
                   <Button
                     type="primary"
                     icon={<CheckCircleOutlined />}
@@ -215,7 +219,7 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, th
                     onClick={() => handleAccept(item.id)}
                   >
                   </Button>
-                )}
+                )} */}
               </div>
               {item.sender === 'user' && (
                 <Avatar icon={<UserOutlined />} className={styles.avatar} />
@@ -244,6 +248,17 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, th
       }
       <div ref={messagesEndRef} />
       <div className={styles.inputArea}>
+        {chatInputValue && (
+          <Tag 
+            className={styles.chatInputTag}
+            closable
+            color="#2db7f5"
+            onClose={handleClearChatInputValue}
+            closeIcon={<CloseOutlined />}
+          >
+            {chatInputValue}
+          </Tag>
+        )}
         <TextArea
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
