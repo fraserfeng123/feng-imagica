@@ -204,3 +204,11 @@
   height: 22px;
   font-size: 14px;
 }
+
+.suggestButton {
+  background: linear-gradient(90deg, #8eefea, #5bc8ec 25%, #a093f4 50%, #f286d1 75%, #fa9191) !important;
+  display: inline-block;
+  border-radius: 20px;
+  color: #fff;
+  height: 36px;
+}

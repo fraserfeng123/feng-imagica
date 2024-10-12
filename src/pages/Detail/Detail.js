@@ -27,6 +27,7 @@ const Detail = () => {
   );
   const [previewNodes, setPreviewNodes] = useState("");
   const [activeTab, setActiveTab] = useState("preview");
+  const [previewLoading, setPreviewLoading] = useState(false);
   const [selectedElement, setSelectedElement] = useState(null);
   const [projectType, setProjectType] = useState("web");
 
@@ -134,6 +135,7 @@ const Detail = () => {
                 </div>
                 <div className={styles.browserContent}>
                   <CodePreview
+                    loading={previewLoading}
                     nodes={previewNodes}
                     title={project.name}
                     description={project.description}
@@ -146,6 +148,8 @@ const Detail = () => {
           </Content>
           <Sider width={500} theme="light" className={styles.chatSider}>
             <ProjectChat
+              setPreviewLoading={setPreviewLoading}
+              project={project}
               nodes={previewNodes}
               onAcceptCode={handleAcceptCode}
               initialChatList={project.chatList}

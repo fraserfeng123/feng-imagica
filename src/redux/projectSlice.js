@@ -59,6 +59,20 @@ const projectSlice = createSlice({
         saveProjectsToLocalStorage(state.projects);
       }
     },
+    updateProjectData: (state, action) => {
+      const { id, name, nodes, features, audience, goal, chatList, buildResult} = action.payload;
+      const project = state.projects.find(p => p.id === id);
+      if (project) {
+        project.name = name;
+        project.nodes = nodes;
+        project.features = features;
+        project.audience = audience;
+        project.goal = goal;
+        project.chatList = chatList;
+        project.buildResult = buildResult;
+        saveProjectsToLocalStorage(state.projects);
+      }
+    },
     updateProjectChatList: (state, action) => {
       const { id, chatList } = action.payload;
       const project = state.projects.find(p => p.id === id);
@@ -87,6 +101,7 @@ export const {
   addProject,
   updateProject,
   updateProjectCode, 
+  updateProjectData,
   updateProjectChatList 
 } = projectSlice.actions;
 

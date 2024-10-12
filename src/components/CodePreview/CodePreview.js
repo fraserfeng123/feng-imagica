@@ -4,9 +4,9 @@ import styles from "./CodePreview.module.css";
 import Title from "../Nodes/Title/Title";
 import SubTitle from "../Nodes/SubTitle/SubTitle";
 import { EditOutlined, DeleteOutlined, MessageOutlined, ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
-import { Tooltip } from 'antd';
+import { Tooltip, Spin } from 'antd';
 
-const CodePreview = ({ nodes = [], title = "", description = "", onNodesChange, onTalkToAI }) => {
+const CodePreview = ({ nodes = [], title = "", description = "", onNodesChange, onTalkToAI, loading }) => {
   const [selected, setSelected] = useState(null);
   const [editing, setEditing] = useState(null);
   const [editValue, setEditValue] = useState("");
@@ -172,13 +172,15 @@ const CodePreview = ({ nodes = [], title = "", description = "", onNodesChange, 
 
   return (
     <div className={styles.previewContainer}>
-      <div className={styles.previewBox} ref={previewRef}>
-        {title && renderElement("title", <Title text={title} />, "title")}
-        {description && renderElement("description", <SubTitle text={description} />, "description")}
-        {userInputs.map((i, index) => 
-          renderElement(index, <Input title={i.data.name} placeholder={i.data.description} />, index)
-        )}
-      </div>
+      <Spin spinning={loading}>
+        <div className={styles.previewBox} ref={previewRef}>
+          {title && renderElement("title", <Title text={title} />, "title")}
+          {description && renderElement("description", <SubTitle text={description} />, "description")}
+          {userInputs.map((i, index) => 
+            renderElement(index, <Input title={i.data.name} placeholder={i.data.description} />, index)
+          )}
+        </div>
+      </Spin>
     </div>
   );
 };

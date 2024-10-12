@@ -1,24 +1,30 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { useDispatch } from 'react-redux';
 import { Card, Input, Button, List, Avatar, Typography, Spin, Tag } from 'antd';
 import { SendOutlined, UserOutlined, CheckCircleOutlined, LoadingOutlined, CloseOutlined } from '@ant-design/icons';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { chatToAI, cancelRequest, sendAiMessageV2 } from '../../services/chatService';
+import { updateProjectData } from '../../redux/projectSlice';
+import { sendMessage, cancelRequest, getAppInfo, buildApp } from '../../services/chatService';
 import styles from './ProjectChat.module.css';
 
 const { TextArea } = Input;
 const { Text } = Typography;
 
-const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, themeColor, selectedElement, onElementSelect, chatInputValue, setChatInputValue }) => {
+const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, themeColor, selectedElement, onElementSelect, chatInputValue, setChatInputValue, project, setPreviewLoading }) => {
   const [messages, setMessages] = useState(initialChatList.length > 0 ? initialChatList : [
     { id: 1, sender: 'system', content: 'Welcome,What would you like to build today?', time: '10:00' },
   ]);
   const [newMessage, setNewMessage] = useState('');
+  const [functions, setFunctions] = useState([]);
+  const [implementation, setImplementation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [rollBack, setRollBack] = useState(false);
   const messagesEndRef = useRef(null);
+
+  const dispatch = useDispatch();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -45,84 +51,77 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, th
       setIsLoading(true);
       setIsTyping(true);
 
-      const copyUserMsg = JSON.parse(JSON.stringify(userMsg));
-      if(messages.length === 1 && code.code.length > 0) {
-        copyUserMsg.content = "基于已有的html代码```" + code.code + "```结合我最新的需求做修改,并且返回我完整的html代码,最新的需求是：" + userMsg.content + ",要求样式美观和现代化，网页主题色是" + themeColor;
-      } else if (rollBack) {
-        copyUserMsg.content = "我修改了一些代码，修改后的代码是```" + code.code + "```，请使用我修改后的代码实现并返回我完整的html代码:" + userMsg.content + ",要求新增的代码样式美观和现代化，网页主题色是" + themeColor;
-      } else {
-        copyUserMsg.content = "基于已有的html代码```" + code.code + "```实现，并返回我完整的html代码，网页要求美观和现代化，"+ themeColor +"：" + userMsg.content;
-      }
+      // const copyUserMsg = JSON.parse(JSON.stringify(userMsg));
+      // if(messages.length === 1 && code.code.length > 0) {
+      //   copyUserMsg.content = "基于已有的html代码```" + code.code + "```结合我最新的需求做修改,并且返回我完整的html代码,最新的需求是：" + userMsg.content + ",要求样式美观和现代化，网页主题色是" + themeColor;
+      // } else if (rollBack) {
+      //   copyUserMsg.content = "我修改了一些代码，修改后的代码是```" + code.code + "```，请使用我修改后的代码实现并返回我完整的html代码:" + userMsg.content + ",要求新增的代码样式美观和现代化，网页主题色是" + themeColor;
+      // } else {
+      //   copyUserMsg.content = "基于已有的html代码```" + code.code + "```实现，并返回我完整的html代码，网页要求美观和现代化，"+ themeColor +"：" + userMsg.content;
+      // }
 
-      // 如果有选中的元素，将其添加到消息中
-      if (selectedElement) {
-        copyUserMsg.content += "\n\n上面描述的修改只针对以下是我选中的元素，其他的代码不要变：\n```html\n" + selectedElement + "\n```";
-      }
+      // // 如果有选中的元素，将其添加到消息中
+      // if (selectedElement) {
+      //   copyUserMsg.content += "\n\n上面描述的修改只针对以下是我选中的元素，其他的代码不要变：\n```html\n" + selectedElement + "\n```";
+      // }
 
       try {
         // 在用 sendMessage 之前清空 selectedElement
         onElementSelect(null);
+        const selectedNodeId = project.nodes.find(x => x.data.name === chatInputValue)?.id ?? "";
+        const selectedNodeIdName = selectedNodeId ? `editor-${selectedNodeId}` : "";
         
-        const reader = await chatToAI(messages, copyUserMsg);
+        const reader = await sendMessage("fraser", newMessage, [], [], project.buildResult.graphstring, chatInputValue, selectedNodeIdName);
         let content = '';
-        let systemMessageAdded = false;
         let buffer = '';
 
-        const processChunk = async () => {
-          const { done, value } = await reader.read();
-          if (done) {
-            setIsLoading(false);
-            setIsTyping(false);
-            return;
-          }
+      const processChunk = async () => {
+        const { done, value } = await reader.read();
+        if (done) {
+          setIsTyping(false);
+          return;
+        }
 
-          const chunk = new TextDecoder().decode(value);
-          buffer += chunk;
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';  // 保留最后一行（可能不完整）
-
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const data = line.slice(5).trim();
-              if (data === '[DONE]') {
-                setIsLoading(false);
-                setIsTyping(false);
-                return;
-              }
-              try {
-                const jsonData = JSON.parse(data);
-                if (jsonData.choices && jsonData.choices[0].delta.content) {
-                  content += jsonData.choices[0].delta.content;
-                  
-                  setMessages(prevMessages => {
-                    if (!systemMessageAdded) {
-                      systemMessageAdded = true;
-                      return [...prevMessages, { 
-                        id: prevMessages.length + 1, 
-                        sender: 'system', 
-                        content: content, 
-                        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
-                      }];
-                    } else {
-                      return prevMessages.map((msg, index) => {
-                        if (index === prevMessages.length - 1) {
-                          return { ...msg, content: content };
-                        }
-                        return msg;
-                      });
-                    }
+        const chunk = new TextDecoder().decode(value);
+        buffer += chunk;
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';  // 保留最后一行（可能不完整）
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(5).trim();
+            if (data === '[DONE]') {
+              setMessages(prevMessages => {
+                const newMessages = [...prevMessages];
+                if (newMessages[newMessages.length - 1].sender === 'system') {
+                  newMessages[newMessages.length - 1].content = content;
+                } else {
+                  // setFunctions(JSON.parse(content).functions);
+                  setImplementation(JSON.parse(content).implementation);
+                  newMessages.push({ 
+                    sender: 'system', 
+                    content: JSON.parse(content).response, 
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
                   });
                 }
-              } catch (error) {
-                console.error('解析JSON时出错:', error, 'Raw data:', data);
-                // 继续处理下一行，不中断整个过程
+                return newMessages;
+              });
+              return;
+            }
+            try {
+              const jsonData = JSON.parse(data);
+              if (jsonData.choices && jsonData.choices[0].delta.content) {
+                content += jsonData.choices[0].delta.content;
               }
+            } catch (error) {
+              console.error('解析JSON时出错:', error, 'Raw data:', data);
+              // 继续处理下一行，不中断整个过程
             }
           }
+        }
 
-          // 继续处理下一个数据块
-          await processChunk();
-        };
+        // 继续处理下一个数据块
+        await processChunk();
+      };
 
         await processChunk();
       } catch (error) {
@@ -135,6 +134,63 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, th
         setIsTyping(false);
         setRollBack(false);
       }
+    }
+  };
+
+  const handleMakeItReal = async () => {
+    setPreviewLoading(true);
+    try {
+      const updatedMessages = [
+        ...messages, 
+        { 
+          sender: 'user', 
+          content: `Update the app`,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+      ];
+      setMessages(updatedMessages);
+
+      const appInfo = await getAppInfo(project.functions, implementation);
+      console.log('App Info:', appInfo);
+      
+      const buildResult = await buildApp("check if the functions are supported", implementation, project.functions, project.buildResult.graphstring);
+      console.log('Build Result:', buildResult);
+
+      // 更新项目
+      const newProject = {
+        id: project.id,
+        name: appInfo.name,
+        description: appInfo.description,
+        nodes: buildResult.graph.nodes,
+        features: appInfo.features,
+        audience: appInfo.audience,
+        goal: appInfo.goal,
+        chatList: updatedMessages,
+        buildResult: buildResult,
+      };
+
+      dispatch(updateProjectData(newProject));
+
+      setMessages(prevMsgs => [
+        ...prevMsgs, 
+        { 
+          sender: 'system', 
+          content: `I've updated your app.`,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+      ]);
+    } catch (error) {
+      console.error('更新项目时出错:', error);
+      setMessages(prevMsgs => [
+        ...prevMsgs, 
+        { 
+          sender: 'system', 
+          content: `Failed to update your app.`,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+      ]);
+    } finally {
+      setPreviewLoading(false);
     }
   };
 
@@ -210,16 +266,16 @@ const ProjectChat = ({ onAcceptCode, initialChatList, onUpdateChatList, code, th
               )}
               <div className={styles.messageContent}>
                 {renderMessageContent(item.content)}
-                {/* {item.sender === 'system' && item.content.includes('```') && (
+                {item.sender === 'system' && item.content.includes('Would you like to update the app') && (
                   <Button
                     type="primary"
-                    icon={<CheckCircleOutlined />}
                     size="small"
-                    className={styles.acceptButton}
-                    onClick={() => handleAccept(item.id)}
+                    className={`text-xs text-gray-700 pl-4 pr-4 pt-2 pb-2 border border-gray-300 rounded-lg cursor-pointer ${styles.suggestButton}`}
+                    onClick={() => handleMakeItReal()}
                   >
+                    Update
                   </Button>
-                )} */}
+                )}
               </div>
               {item.sender === 'user' && (
                 <Avatar icon={<UserOutlined />} className={styles.avatar} />

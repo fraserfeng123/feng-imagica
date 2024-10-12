@@ -158,6 +158,8 @@ const Chat = () => {
         goal: appInfo.goal,
         chatList: updatedMessages,
         buildResult: buildResult,
+        functions: functions,
+        implementation: implementation,
       };
 
       dispatch(createProject(newProject));

@@ -1,6 +1,6 @@
 let controller = null;
 
-export const sendMessage = async (userName, userMessage, functionalityMessages = [], responseMessages = [], graphstring = "") => {
+export const sendMessage = async (userName, userMessage, functionalityMessages = [], responseMessages = [], graphstring = "", selectedNodeName = "", selectedNodeId = "") => {
   // 取消之前的请求(如果存在)
   if (controller) {
     controller.abort();
@@ -27,7 +27,9 @@ export const sendMessage = async (userName, userMessage, functionalityMessages =
         functionality_messages: functionalityMessages,
         response_messages: responseMessages,
         graphstring: graphstring,
-        stream: true
+        stream: true,
+        selected_node_id: selectedNodeId,
+        selected_node_name: selectedNodeName
       }),
       signal: controller.signal
     });
