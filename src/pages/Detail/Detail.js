@@ -117,6 +117,7 @@ const Detail = () => {
               <div className={styles.iphoneModel}>
                 <div className={styles.iphoneScreen}>
                   <CodePreview
+                    loading={previewLoading}
                     nodes={previewNodes}
                     title={project.name}
                     description={project.description}
