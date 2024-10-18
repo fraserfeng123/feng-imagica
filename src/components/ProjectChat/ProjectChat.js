@@ -3,8 +3,6 @@ import ReactMarkdown from 'react-markdown';
 import { useDispatch } from 'react-redux';
 import { Card, Input, Button, List, Avatar, Typography, Spin, Tag } from 'antd';
 import { SendOutlined, UserOutlined, CheckCircleOutlined, LoadingOutlined, CloseOutlined } from '@ant-design/icons';
-import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { updateProjectData } from '../../redux/projectSlice';
 import { sendMessage, cancelRequest, getAppInfo, buildApp } from '../../services/chatService';
 import styles from './ProjectChat.module.css';
