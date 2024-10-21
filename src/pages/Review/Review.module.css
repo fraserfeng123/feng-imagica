@@ -1,0 +1,12 @@
+.reviewLayout {
+  min-height: 100vh;
+}
+
+.content {
+  padding: 24px;
+  background-color: #fff;
+}
+
+.previewBox {
+  margin-top: 24px;
+}

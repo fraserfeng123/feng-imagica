@@ -62,6 +62,11 @@ const ProjectInfo = ({ project }) => {
     }
   };
 
+  const goToPreview = () => {
+    window.open(`${window.location.origin}/review/${project.id}`)
+    // navigate(`/review/${project.id}`);
+  }
+
   return (
     <Card className={styles.projectInfo}>
       <Row gutter={[16, 0]} align="middle">
@@ -74,10 +79,10 @@ const ProjectInfo = ({ project }) => {
           <Space>
             <Button 
               type="primary" 
-              icon={<DownloadOutlined />} 
-              onClick={downloadCode}
+              // icon={<DownloadOutlined />}
+              onClick={goToPreview}
             >
-              Download Code
+              Publish
             </Button>
             <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/projects')}>Back</Button>
           </Space>
