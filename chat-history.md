@@ -78,6 +78,52 @@ sequenceDiagram
 5. **可观测**  
    全链路日志强制带 `session_id` 与 `task_id`（及可选 `scenario`），关键步骤单条日志用 `|` 拼接字段，便于检索。
 
+### 3.1 Notification 与 BaseAMMsg（msg）还要怎么重构
+
+当前关系：`AmNotificationService._publish` → `Notification.from_instance(am_msg)` → `name = am_msg.__class__.__name__`，`body = am_msg.model_dump()`（扁平，含 `type`、业务字段、UX 字段混在一起）。  
+重构时把 **「Ably 传输壳」**（`Notification`）与 **「业务消息模型」**（`BaseAMMsg` 子类）职责划清，并与 **scenario / 信封** 对齐。
+
+#### Notification 层（`src/schema/notification.py`）
+
+| 现状 | 重构方向 |
+|------|----------|
+| `name` 用 Python **类名**，客户端协议与实现类强绑定 | **兼容期**：`name` 仍用类名；**body 内**增加稳定字段 `scenario`（及可选 `schema_version`）。长期可改为 `name` 与 `scenario` 一致或由客户端只认 `body.scenario` |
+| `from_instance` 只做 `model_dump()` | 新增 **`from_am_msg(msg, schema_version=1)`**（或扩展 `from_instance`）：在 `body` 内组装 `am: { schema_version, scenario, callback, payload }`，并与 **扁平 dump 双写**（见 §8.4） |
+| `body` 无版本 | `body` 顶层或 `body.am.schema_version` 便于协议演进与客户端分支解析 |
+| 与上行无对称概念 | 上行 `AMCallbackEnvelope` 与下行 `body.am` 字段对齐（同名：`session_id`、`task_id`、`scenario` 等），文档可一张表对照 |
+
+**原则**：`Notification` 保持 **薄**；不重写业务逻辑，只负责 **id/时间戳/name/body 形状**。复杂组装放在 `BaseAMMsg.to_notification_body()` 或独立 `am_notification_builder` 模块，避免 `AmNotificationService` 里手写 dict。
+
+#### BaseAMMsg / 各 `am_*` 子类（`src/msg/base_am_msg.py` 等）
+
+| 现状 | 重构方向 |
+|------|----------|
+| `__init__` 里写死 `type = 类名`，timeout 用 `AM_MSG_TIMEOUTS[type]` | 保留 `type` 兼容；timeout 改为 **`scenario` 键**（子类提供 `scenario` 属性或注册表 `类 → scenario`） |
+| 传输字段与 UX 字段（`title`/`detail`/`failed_*`）同层 | **渐进**：子类拆 **业务载荷** 为内嵌 `Payload` 模型或明确「哪些进 `payload`、哪些留在顶层给灵动岛」；`to_notification_body()` 输出双写结构 |
+| `common_fields` 里 `expendable` 与基类 `expandable` 命名并存 | 与客户端对齐后 **统一拼写**，避免序列化里两套 key |
+| 每文件一个巨长 `from_params` | 收敛为「信封字段 + `Payload.model_validate`」，减少重复 |
+
+#### 二者协作关系（目标）
+
+```
+BaseAMMsg 子类
+  ├─ scenario（稳定）
+  ├─ 业务字段 → 进入 body.am.payload（及兼容期顶层扁平）
+  ├─ UX 字段（title/detail/…）→ 可保留顶层或划入 body.am.ui（视客户端）
+  └─ to_notification_body() -> dict
+
+Notification.from_am_msg(msg)
+  ├─ name: 类名（兼容）或 scenario（长期）
+  ├─ body: to_notification_body()
+  └─ id / created / arrival 不变
+```
+
+#### 与 §5 工作项的对应
+
+- **工作项 C（下行消息演进）**：主要动 **BaseAMMsg 子类 + builder + `Notification.from_*`**。  
+- **工作项 E（callback_url）**：`callback_url` 由工厂写入 msg，**组装进 `body.am.callback`**，与 `CALLBACK_PATH_BY_SCENARIO` 一致。  
+- **工作项 A（目录表）**：增加列 **「Ably `Notification.name`」**、**「body 关键键（含是否含 am 嵌套）」**。
+
 ---
 
 ## 4. 现状问题汇总（按主线归纳）
@@ -307,6 +353,47 @@ AM_TIMEOUT_MS_BY_SCENARIO: dict[str, int] = {
 }
 ```
 
+### 8.7 Notification 与 BaseAMMsg 协作（示意）
+
+```python
+from pydantic import BaseModel
+
+from src.schema.notification import Notification
+from src.util.gen_util import gen_id
+import time
+
+
+def notification_from_am_msg(msg: BaseModel, *, scenario: str, schema_version: int = 1) -> Notification:
+    """目标形态：扁平兼容 + body.am 嵌套信封（与 §3.1、§8.4 一致）"""
+    flat = msg.model_dump()
+    payload = {
+        k: flat[k]
+        for k in ("package_name", "app_name")
+        if k in flat
+    }  # 示例：按子类定义要进 payload 的键
+    body = {
+        **flat,
+        "scenario": scenario,
+        "am": {
+            "schema_version": schema_version,
+            "scenario": scenario,
+            "session_id": flat.get("session_id"),
+            "task_id": flat.get("task_id"),
+            "callback": {"mode": "url", "value": flat.get("callback_url")},
+            "payload": payload,
+        },
+    }
+    return Notification(
+        id=gen_id(),
+        created=int(time.time()),
+        arrival=int(time.time()),
+        name=msg.__class__.__name__,
+        body=body,
+    )
+```
+
+> 落地时：`payload` 的键集合应由各 `AM*Msg` 显式声明（或 `model_dump` 排除 `title`/`detail`/信封字段），避免再混一层。
+
 ---
 
 ## 9. 关键代码索引
@@ -349,3 +436,4 @@ AM_TIMEOUT_MS_BY_SCENARIO: dict[str, int] = {
 | 2026-03-19 | 增加消息定义重构专节 |
 | 2026-03-19 | **整体重写**：以端到端主线串联下行/回调/编排；合并目标与路线图；补充 mermaid 与反模式 |
 | 2026-03-19 | 新增 §8 代码示例（scenario、信封、JSON、双写、remote_action、超时） |
+| 2026-03-19 | 新增 §3.1 Notification/BaseAMMsg 重构要点；§8.7 协作示意代码 |
