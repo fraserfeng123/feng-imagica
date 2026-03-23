@@ -124,6 +124,51 @@ Notification.from_am_msg(msg)
 - **工作项 E（callback_url）**：`callback_url` 由工厂写入 msg，**组装进 `body.am.callback`**，与 `CALLBACK_PATH_BY_SCENARIO` 一致。  
 - **工作项 A（目录表）**：增加列 **「Ably `Notification.name`」**、**「body 关键键（含是否含 am 嵌套）」**。
 
+### 3.2 服务外置：独立项目与 planning-api 只负责调用
+
+部分与 AM 强相关的逻辑（例如：**统一回调网关、消息组装、与设备侧的协议适配**）可能落在 **另一个仓库/服务** 中部署；**planning-api** 保留编排、会话、Planning Agent、remote_action 与现有业务域，通过 **RPC/HTTP 调用** 外置服务。本节约束后续重构的 **边界与契约**，避免继续把协议埋在 planning-api 内部实现里。
+
+#### 职责划分（建议，可按实际调整）
+
+| 归属 | 典型职责 |
+|------|----------|
+| **外置服务（AM Gateway / Device Command 等）** | 统一下行报文形态、回调入口收敛、与 AM/设备协议版本对齐、可选直连 Ably 或由 planning-api 代发（二选一需在目录表写明） |
+| **planning-api** | 业务决策（何时发哪类指令）、用户鉴权上下文、Conductor/Toolkit、`remote_action` 与流式会话、访问本库 DB；**不重复实现**已与外置服务约定的协议细节 |
+
+#### 对本文前述重构的影响（对齐方式）
+
+1. **契约优先、实现后置**  
+   §3 中的 **scenario + envelope + payload**、§8 中的示例，应视为 **跨服务契约**（OpenAPI / 共享 JSON Schema / 内部包），两个代码库 **共用同一份定义**，而不是各写各的 Pydantic。
+
+2. **planning-api 侧增加「端口 + 实现」**  
+   - 定义窄接口（示例名）：`AmCommandPort`：`publish_command(...)` / `register_callback_route(...)` 等，由 **本地实现**（当前 `AmNotificationService` 直连 Ably）与 **远程实现**（`httpx`/`aiohttp` 调外置服务）切换。  
+   - 配置项：`AM_COMMAND_SERVICE_BASE_URL`、超时、**mTLS 或服务间 token**；无 URL 时走本地实现，便于渐进迁移。
+
+3. **回调路径与 BFF**  
+   - **方案 A**：AM **仍回调 planning-api**（路径不变或仅网关路径），planning-api **转发** 或直接 `put_action_*`，外置服务不参与 HTTP 入站。  
+   - **方案 B**：AM **回调外置服务**，外置服务处理后再 **回调 planning-api** 一个 **内网接口**（仅投递 `session_id` + 精简 payload + 签名），由 planning-api 写 `remote_action`。  
+   须在《AM 通讯目录》中 **逐 scenario 标明** 采用 A 或 B，以及 **最终写入 Redis 的一方**。
+
+4. **remote_action / Redis 归属**  
+   若会话编排仍在 planning-api，则 **`put_action_*` 的调用方** 必须是 planning-api 或可信任内网调用；外置服务方案 B 下需 **服务间认证**，避免任意主机投递伪造 `session_id`。
+
+5. **观测**  
+   跨服务调用在日志中增加 **`upstream=am_command_svc`**（或等价）与 **request_id 传递**（header），与 `session_id|task_id|scenario` 拼接，便于全链路排查。
+
+#### planning-api 内建议新增/调整的代码位置（示意）
+
+| 层次 | 说明 |
+|------|------|
+| `src/infra/am_command/` 或 `src/case/am_agent/ports/` | `AmCommandPort` 协议 + `LocalAmCommandAdapter` + `RemoteAmCommandClient` |
+| `src/config/inject_config.py` | 按配置绑定 Port 实现 |
+| `src/kernel/settings.py` | `AM_COMMAND_SERVICE_BASE_URL`、开关 `AM_COMMAND_USE_REMOTE` |
+
+#### 与路线图的关系
+
+- 在 **§6 阶段 1《通讯目录》** 中增加列：**「实现位置：planning-api / 外置服务 / 双写」**。  
+- **阶段 2～3** 可与 **引入 Port + 远程 Client** 并行：先契约与目录一致，再切流量到外置服务。  
+- 外置服务 **未就绪前**，仅保留本地实现，不改变对 AM 客户端的可见行为。
+
 ---
 
 ## 4. 现状问题汇总（按主线归纳）
@@ -136,6 +181,7 @@ Notification.from_am_msg(msg)
 | **编排** | `put_action_*` 与超时、监听者判断分散在各 `rest`，模式重复（安装、LINE、IM…） |
 | **配置** | `AM_MSG_TIMEOUTS` 按类名字符串；超时与 scenario、回调 path 未绑定 |
 | **可观测** | Ably / HTTP / Redis 三段靠手工从日志拼链路 |
+| **服务边界** | 能力与协议堆在 planning-api 单仓，后续抽到独立项目时缺少清晰 Port/契约，迁移成本高 |
 
 ---
 
@@ -415,7 +461,8 @@ def notification_from_am_msg(msg: BaseModel, *, scenario: str, schema_version: i
 
 - **客户端发版**：信封与 path 变更必须经历双写或兼容期，目录表需标注版本。  
 - **鉴权**：网关合并后需逐 scenario 审计是否允许匿名或需 token。  
-- **多实例**：remote_action 依赖 Redis 订阅语义，扩缩与连接数保持现有假设或单独评估。
+- **多实例**：remote_action 依赖 Redis 订阅语义，扩缩与连接数保持现有假设或单独评估。  
+- **跨服务**：外置 AM 服务与 planning-api 之间的 **超时、重试、熔断** 及 **服务间鉴权** 需单独设计；外置服务不可用时的降级策略（仅本地路径 / 只读模式等）需在目录表注明。
 
 ---
 
@@ -425,6 +472,8 @@ def notification_from_am_msg(msg: BaseModel, *, scenario: str, schema_version: i
 - [ ] `task_id` 语义：全局唯一 vs 仅 session 内唯一？
 - [ ] 是否引入上行 **idempotency-key**？
 - [ ] 下行 **schema_version** 起始值与双写周期（周/月级）？
+- [ ] AM 相关能力 **外置服务** 的最终边界：哪些 API/回调 **必须** 留在 planning-api（BFF）？
+- [ ] 回调链路采用 **§3.2 方案 A 还是 B**（或按 scenario 混用）？`put_action_*` 的 **唯一合法写入方** 是谁？
 
 ---
 
@@ -437,3 +486,4 @@ def notification_from_am_msg(msg: BaseModel, *, scenario: str, schema_version: i
 | 2026-03-19 | **整体重写**：以端到端主线串联下行/回调/编排；合并目标与路线图；补充 mermaid 与反模式 |
 | 2026-03-19 | 新增 §8 代码示例（scenario、信封、JSON、双写、remote_action、超时） |
 | 2026-03-19 | 新增 §3.1 Notification/BaseAMMsg 重构要点；§8.7 协作示意代码 |
+| 2026-03-19 | 新增 §3.2 服务外置与 planning-api 调用（Port、回调 A/B、Redis 归属、路线图衔接） |
